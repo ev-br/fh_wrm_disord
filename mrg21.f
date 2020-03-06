@@ -272,8 +272,8 @@ c	print*,'after: ',Z_b, Z_b_max
 
 
 !--- condensate
-	print*; print*,'doing g_im(w=0,k=0): '
-	call mrg(im_all(1:b_n_all),b_n_all,1)
+c	print*; print*,'doing g_im(w=0,k=0): '
+c	call mrg(im_all(1:b_n_all),b_n_all,1)
 
 
 
