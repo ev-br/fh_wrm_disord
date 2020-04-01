@@ -1,0 +1,167 @@
+ I am #           1  - par_m5.2L8b4.25           8
+ 
+ I am #           2  - par_m5.2L8b4.25           8
+ 
+ I am #           3  - par_m5.2L8b4.25           8
+ 
+ I am #           4  - par_m5.2L8b4.25           8
+ 
+ I am #           5  - par_m5.2L8b4.25           8
+ 
+ I am #           6  - par_m5.2L8b4.25           8
+ 
+ I am #           9  - par_m5.2L8b4.5           8
+ 
+ I am #          10  - par_m5.2L8b4.5           8
+ 
+ I am #          11  - par_m5.2L8b4.5           8
+ 
+ I am #          12  - par_m5.2L8b4.5           8
+ 
+ I am #          13  - par_m5.2L8b4.5           8
+ 
+ I am #          14  - par_m5.2L8b4.5           8
+ 
+ I am #          15  - par_m5.2L8b4.5           8
+ 
+ I am #           7  - par_m5.2L8b4.25           8
+ 
+ I am #           0  - par_m5.2L8b4.25           8
+ 
+ I am #           8  - par_m5.2L8b4.5           8
+ 
+forrtl: severe (24): end-of-file during read, unit 1, file /home/eburovskiy/10yr_repro/10yr_repro_challenge_35/runs/m5.2L8/cnf_m5.2L8b4.25_1.dat
+Image              PC                Routine            Line        Source             
+a.i.out.mpi        000000000042E13B  Unknown               Unknown  Unknown
+a.i.out.mpi        0000000000446F0F  Unknown               Unknown  Unknown
+a.i.out.mpi        00000000004126AD  Unknown               Unknown  Unknown
+a.i.out.mpi        000000000040C874  Unknown               Unknown  Unknown
+a.i.out.mpi        0000000000405152  Unknown               Unknown  Unknown
+libc-2.17.so       00007F2DEDF4A505  __libc_start_main     Unknown  Unknown
+a.i.out.mpi        0000000000405069  Unknown               Unknown  Unknown
+forrtl: severe (24): end-of-file during read, unit 1, file /home/eburovskiy/10yr_repro/10yr_repro_challenge_35/runs/m5.2L8/cnf_m5.2L8b4.25_5.dat
+Image              PC                Routine            Line        Source             
+a.i.out.mpi        000000000042E13B  Unknown               Unknown  Unknown
+a.i.out.mpi        0000000000446F0F  Unknown               Unknown  Unknown
+a.i.out.mpi        00000000004126AD  Unknown               Unknown  Unknown
+a.i.out.mpi        000000000040C874  Unknown               Unknown  Unknown
+a.i.out.mpi        0000000000405152  Unknown               Unknown  Unknown
+libc-2.17.so       00007FCD66634505  __libc_start_main     Unknown  Unknown
+a.i.out.mpi        0000000000405069  Unknown               Unknown  Unknown
+forrtl: severe (24): end-of-file during read, unit 1, file /home/eburovskiy/10yr_repro/10yr_repro_challenge_35/runs/m5.2L8/cnf_m5.2L8b4.25_7.dat
+Image              PC                Routine            Line        Source             
+a.i.out.mpi        000000000042E13B  Unknown               Unknown  Unknown
+a.i.out.mpi        0000000000446F0F  Unknown               Unknown  Unknown
+a.i.out.mpi        00000000004126AD  Unknown               Unknown  Unknown
+a.i.out.mpi        000000000040C874  Unknown               Unknown  Unknown
+a.i.out.mpi        0000000000405152  Unknown               Unknown  Unknown
+libc-2.17.so       00007F43F2401505  __libc_start_main     Unknown  Unknown
+a.i.out.mpi        0000000000405069  Unknown               Unknown  Unknown
+forrtl: severe (24): end-of-file during read, unit 1, file /home/eburovskiy/10yr_repro/10yr_repro_challenge_35/runs/m5.2L8/cnf_m5.2L8b4.5_5.dat
+Image              PC                Routine            Line        Source             
+a.i.out.mpi        000000000042E13B  Unknown               Unknown  Unknown
+a.i.out.mpi        0000000000446F0F  Unknown               Unknown  Unknown
+a.i.out.mpi        00000000004126AD  Unknown               Unknown  Unknown
+a.i.out.mpi        000000000040C874  Unknown               Unknown  Unknown
+a.i.out.mpi        0000000000405152  Unknown               Unknown  Unknown
+libc-2.17.so       00007FDD57C49505  __libc_start_main     Unknown  Unknown
+a.i.out.mpi        0000000000405069  Unknown               Unknown  Unknown
+forrtl: severe (24): end-of-file during read, unit 1, file /home/eburovskiy/10yr_repro/10yr_repro_challenge_35/runs/m5.2L8/cnf_m5.2L8b4.5_6.dat
+Image              PC                Routine            Line        Source             
+a.i.out.mpi        000000000042E13B  Unknown               Unknown  Unknown
+a.i.out.mpi        0000000000446F0F  Unknown               Unknown  Unknown
+a.i.out.mpi        00000000004126AD  Unknown               Unknown  Unknown
+a.i.out.mpi        000000000040C874  Unknown               Unknown  Unknown
+a.i.out.mpi        0000000000405152  Unknown               Unknown  Unknown
+libc-2.17.so       00007F34394C0505  __libc_start_main     Unknown  Unknown
+a.i.out.mpi        0000000000405069  Unknown               Unknown  Unknown
+forrtl: severe (24): end-of-file during read, unit 1, file /home/eburovskiy/10yr_repro/10yr_repro_challenge_35/runs/m5.2L8/cnf_m5.2L8b4.25_3.dat
+Image              PC                Routine            Line        Source             
+a.i.out.mpi        000000000042E13B  Unknown               Unknown  Unknown
+a.i.out.mpi        0000000000446F0F  Unknown               Unknown  Unknown
+a.i.out.mpi        00000000004126AD  Unknown               Unknown  Unknown
+a.i.out.mpi        000000000040C874  Unknown               Unknown  Unknown
+a.i.out.mpi        0000000000405152  Unknown               Unknown  Unknown
+libc-2.17.so       00007F1BB78B2505  __libc_start_main     Unknown  Unknown
+a.i.out.mpi        0000000000405069  Unknown               Unknown  Unknown
+forrtl: severe (24): end-of-file during read, unit 1, file /home/eburovskiy/10yr_repro/10yr_repro_challenge_35/runs/m5.2L8/cnf_m5.2L8b4.5_3.dat
+Image              PC                Routine            Line        Source             
+a.i.out.mpi        000000000042E13B  Unknown               Unknown  Unknown
+a.i.out.mpi        0000000000446F0F  Unknown               Unknown  Unknown
+a.i.out.mpi        00000000004126AD  Unknown               Unknown  Unknown
+a.i.out.mpi        000000000040C874  Unknown               Unknown  Unknown
+a.i.out.mpi        0000000000405152  Unknown               Unknown  Unknown
+libc-2.17.so       00007F1560F7B505  __libc_start_main     Unknown  Unknown
+a.i.out.mpi        0000000000405069  Unknown               Unknown  Unknown
+forrtl: severe (24): end-of-file during read, unit 1, file /home/eburovskiy/10yr_repro/10yr_repro_challenge_35/runs/m5.2L8/cnf_m5.2L8b4.25_2.dat
+Image              PC                Routine            Line        Source             
+a.i.out.mpi        000000000042E13B  Unknown               Unknown  Unknown
+a.i.out.mpi        0000000000446F0F  Unknown               Unknown  Unknown
+a.i.out.mpi        00000000004126AD  Unknown               Unknown  Unknown
+a.i.out.mpi        000000000040C874  Unknown               Unknown  Unknown
+a.i.out.mpi        0000000000405152  Unknown               Unknown  Unknown
+libc-2.17.so       00007F6748F0C505  __libc_start_main     Unknown  Unknown
+a.i.out.mpi        0000000000405069  Unknown               Unknown  Unknown
+forrtl: severe (24): end-of-file during read, unit 1, file /home/eburovskiy/10yr_repro/10yr_repro_challenge_35/runs/m5.2L8/cnf_m5.2L8b4.25_4.dat
+Image              PC                Routine            Line        Source             
+a.i.out.mpi        000000000042E13B  Unknown               Unknown  Unknown
+a.i.out.mpi        0000000000446F0F  Unknown               Unknown  Unknown
+a.i.out.mpi        00000000004126AD  Unknown               Unknown  Unknown
+a.i.out.mpi        000000000040C874  Unknown               Unknown  Unknown
+a.i.out.mpi        0000000000405152  Unknown               Unknown  Unknown
+libc-2.17.so       00007FE9A421F505  __libc_start_main     Unknown  Unknown
+a.i.out.mpi        0000000000405069  Unknown               Unknown  Unknown
+forrtl: severe (24): end-of-file during read, unit 1, file /home/eburovskiy/10yr_repro/10yr_repro_challenge_35/runs/m5.2L8/cnf_m5.2L8b4.25_6.dat
+Image              PC                Routine            Line        Source             
+a.i.out.mpi        000000000042E13B  Unknown               Unknown  Unknown
+a.i.out.mpi        0000000000446F0F  Unknown               Unknown  Unknown
+a.i.out.mpi        00000000004126AD  Unknown               Unknown  Unknown
+a.i.out.mpi        000000000040C874  Unknown               Unknown  Unknown
+a.i.out.mpi        0000000000405152  Unknown               Unknown  Unknown
+libc-2.17.so       00007F161CC7A505  __libc_start_main     Unknown  Unknown
+a.i.out.mpi        0000000000405069  Unknown               Unknown  Unknown
+forrtl: severe (24): end-of-file during read, unit 1, file /home/eburovskiy/10yr_repro/10yr_repro_challenge_35/runs/m5.2L8/cnf_m5.2L8b4.5_7.dat
+Image              PC                Routine            Line        Source             
+a.i.out.mpi        000000000042E13B  Unknown               Unknown  Unknown
+a.i.out.mpi        0000000000446F0F  Unknown               Unknown  Unknown
+a.i.out.mpi        00000000004126AD  Unknown               Unknown  Unknown
+a.i.out.mpi        000000000040C874  Unknown               Unknown  Unknown
+a.i.out.mpi        0000000000405152  Unknown               Unknown  Unknown
+libc-2.17.so       00007F6A7ADA6505  __libc_start_main     Unknown  Unknown
+a.i.out.mpi        0000000000405069  Unknown               Unknown  Unknown
+forrtl: severe (24): end-of-file during read, unit 1, file /home/eburovskiy/10yr_repro/10yr_repro_challenge_35/runs/m5.2L8/cnf_m5.2L8b4.5_2.dat
+Image              PC                Routine            Line        Source             
+a.i.out.mpi        000000000042E13B  Unknown               Unknown  Unknown
+a.i.out.mpi        0000000000446F0F  Unknown               Unknown  Unknown
+a.i.out.mpi        00000000004126AD  Unknown               Unknown  Unknown
+a.i.out.mpi        000000000040C874  Unknown               Unknown  Unknown
+a.i.out.mpi        0000000000405152  Unknown               Unknown  Unknown
+libc-2.17.so       00007FF57B7D2505  __libc_start_main     Unknown  Unknown
+a.i.out.mpi        0000000000405069  Unknown               Unknown  Unknown
+forrtl: severe (24): end-of-file during read, unit 1, file /home/eburovskiy/10yr_repro/10yr_repro_challenge_35/runs/m5.2L8/cnf_m5.2L8b4.5_4.dat
+Image              PC                Routine            Line        Source             
+a.i.out.mpi        000000000042E13B  Unknown               Unknown  Unknown
+a.i.out.mpi        0000000000446F0F  Unknown               Unknown  Unknown
+a.i.out.mpi        00000000004126AD  Unknown               Unknown  Unknown
+a.i.out.mpi        000000000040C874  Unknown               Unknown  Unknown
+a.i.out.mpi        0000000000405152  Unknown               Unknown  Unknown
+libc-2.17.so       00007FC1B6FC0505  __libc_start_main     Unknown  Unknown
+a.i.out.mpi        0000000000405069  Unknown               Unknown  Unknown
+
+===================================================================================
+=   BAD TERMINATION OF ONE OF YOUR APPLICATION PROCESSES
+=   RANK 7 PID 114785 RUNNING AT cn-007
+=   KILLED BY SIGNAL: 9 (Killed)
+===================================================================================
+
+===================================================================================
+=   BAD TERMINATION OF ONE OF YOUR APPLICATION PROCESSES
+=   RANK 8 PID 114786 RUNNING AT cn-007
+=   KILLED BY SIGNAL: 9 (Killed)
+===================================================================================
+
+===================================================================================
+=   BAD TERMINATION OF ONE OF YOUR APPLICATION PROCESSES
+=   RANK 15 PID 114793 RUNNING AT cn-007
+=   KILLED BY SIGNAL: 9 (Killed)
+===================================================================================

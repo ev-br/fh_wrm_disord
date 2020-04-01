@@ -1,0 +1,13 @@
+ I am #           0  - par_m5.2L6b4.0           1
+ 
+ I am #           1  - par_m5.2L6b4.5           1
+ 
+ I am #           3  - par_m5.2L6b5.0           1
+ 
+ I am #           2  - par_m5.2L6b3.5           1
+ 
+ rt_le > beta /2
+ rt_le > beta /2
+srun: Job step aborted: Waiting up to 32 seconds for job step to finish.
+slurmstepd: error: *** JOB 26290 ON cn-005 CANCELLED AT 2020-02-20T22:00:52 ***
+slurmstepd: error: *** STEP 26290.0 ON cn-005 CANCELLED AT 2020-02-20T22:00:52 ***
