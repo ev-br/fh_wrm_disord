@@ -1,6 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=m5.2L12
 #SBATCH -n 24
+#SBATCH -t 5-00:00
 
 #module load openblas
 #mpirun ../../a.out.mpi
