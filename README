@@ -1,3 +1,35 @@
+This repository is the supplementary material for the 10 Year Reproducibility
+Challenge (https://github.com/ReScience/ten-years) submission 35:
+a (partial) replication of Phys. Rev. Lett. 96, 160402 (2006) and 
+New J.Phys. 8, 153 (2006).
+
+All materials in this repository are in public domain.
+
+Contents:
+
+- top level : the Fortran simulation code and small-scale test case are from
+<http://montecarlo.csi.cuny.edu/umass/fermion.html>
+
+- ./arch/data_m5.2 : historic data files from 2006, from a backup.
+
+- ./runs : raw data from replication runs of 2020. 
+
+- ./data : MC results of 2020 and data analysis. 
+
+To collect the MC results from the raw data, navigate to the run folder
+(with `an_XXX` file and `stats_XXX` files, and run
+
+```
+$ ../merge < an_XXX
+```
+
+where `merge` is the result of compilation of `merge.f` at the top level.
+)
+
+The rest of this file is the README from 2006, verbatim.
+
+
+==========================================================
 
 This bundle contains the implementation of the Fermi-Hubbard model
 solver via the determinant diagrammatic Monte Carlo method.
