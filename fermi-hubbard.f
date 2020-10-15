@@ -733,17 +733,17 @@ c	print*
 
 ! ira-masha 
       if(present)then
-          xm=x(:,ksite(masha)); tm=ktau(masha)
-          m_u(row(masha)) = GREENFUN(xnew,tnew,xm,tm)
-          xi=x(:,ksite(ira)); ti=ktau(ira)
-          m_v(clmn(ira)) = GREENFUN(xi,ti,xnew,tnew)
+          tm=ktau(masha)
+          m_u(row(masha)) = GREENFUN(site, tnew, ksite(masha), tm)
+          ti=ktau(ira)
+          m_v(clmn(ira)) = GREENFUN(ksite(ira), ti, site, tnew)
       endif
 
 ! calcualte the det ratio
 	do j=1,nmnm; vova=namelist(j); 
-	   xv=x(:,ksite(vova)); tv=ktau(vova)
-	   m_v(clmn(vova)) = GREENFUN(xv,tv,xnew,tnew)
-	   m_u(row(vova))  = GREENFUN(xnew,tnew,xv,tv)
+	   tv=ktau(vova)
+	   m_v(clmn(vova)) = GREENFUN(ksite(vova), tv, site, tnew)
+	   m_u(row(vova))  = GREENFUN(site, tnew, ksite(vova), tv)
 	enddo
 	m_s = g0000
 	det = det_p1(pm,lda,matr,m_u,m_v,m_z,m_s)   ! det ratio itself
@@ -852,7 +852,7 @@ c	call CheckDropName(name);
 	real*8  :: det
 
       real*8 :: ti,tm,tv,ratio, gim
-      integer :: si,sm, xv(d),xi(d),xm(d) ,j, vova, jm
+      integer :: si,sm, sv, xv(d),xi(d),xm(d) ,j, vova, jm
 
 	prevstatus=status; status='create'; acpt=.false.
 
@@ -875,15 +875,15 @@ c	call CheckDropName(name);
 	if(tm<0.d0)tm=tm+beta; if(tm>beta)tm=tm-beta   ! \beta-periodic
 	
 !----------- determinant
-      gim=GREENFUN(xi,ti,xm,tm)
+      gim=GREENFUN(si, ti, sm, tm)
 
       if(nmnm==0)then; det=gim
       else
 
           do j=1,nmnm; vova=namelist(j);
-             xv=x(:,ksite(vova)); tv=ktau(vova)
-             m_u(row(vova))  = GREENFUN(xi,ti,xv,tv)   	
-             m_v(clmn(vova)) = GREENFUN(xv,tv,xm,tm)
+             sv=ksite(vova); tv=ktau(vova)
+             m_u(row(vova))  = GREENFUN(si, ti, sv, tv)   	
+             m_v(clmn(vova)) = GREENFUN(sv, tv, sm, tm)
           enddo
           m_s = gim
           det = det_p1(pm,lda,matr,m_u,m_v,m_z,m_s)   ! det ratio itself
@@ -1001,7 +1001,7 @@ c	call CheckDropName(name);
 ! This is the heart of the method: worm-type update that creates an extra kink
 !
 	real*8  :: ratio, tnew, tm, tv, best, sign
-	integer :: site,sm,i,j,nk, xnew(d), xm(d), xv(d)
+	integer :: site,sm, sv, i,j,nk, xnew(d), xm(d), xv(d)
 	integer :: vova, name, site1,ev, nk1
 
 	prevstatus=status; status='leap_a'; acpt=.false.
@@ -1087,16 +1087,16 @@ c	call CheckDropName(name);
 
 !------------- determinant
 	do j=1,pm; vova=nm_row(j)               ! fill a column
-	   xv=x(:,ksite(vova)); tv=ktau(vova)
-	   m_u(j)  = GREENFUN(xm,tm,xv,tv)
+	   sv=ksite(vova); tv=ktau(vova)
+	   m_u(j)  = GREENFUN(sm, tm, sv, tv)
 	enddo
 
 	do j=1,pm; vova=nm_clmn(j)              ! fill a row
-	   xv=x(:,ksite(vova)); tv=ktau(vova)
-	   m_v(j) = GREENFUN(xv,tv,xnew,tnew)
+	   sv = ksite(vova); tv=ktau(vova)
+	   m_v(j) = GREENFUN(sv, tv, site, tnew)
 	enddo
 
-	m_s = GREENFUN(xm,tm,xnew,tnew)          ! a corner & det
+	m_s = GREENFUN(sm, tm, site, tnew)          ! a corner & det
 	det = det_p1(pm,lda,matr,m_u,m_v,m_z,m_s)   ! det ratio itself
 !---------------------------
 
@@ -1195,7 +1195,7 @@ c 	call CheckGetName;
 	enddo
 	dovesok = ( dx(1)+dx(2)*N(1)+dx(3)*N(1)*N(2) ) * 1.d-14      ! see tab_leaps()
 
-	www = GREENFUN(x(:,site),0.0d0,x(:,sm),t1)**2 + dovesok
+	www = GREENFUN(site, 0.0d0, sm, t1)**2 + dovesok
 	www = www / w_norm
 !----------------------------------------
  
@@ -1255,7 +1255,7 @@ c	call CheckDropName(name);
 	real*8  :: det
 
 	real*8 :: ratio, tm, tv, tnew  
-	integer :: i,j,sm, sm_new,xm(d),xnew(d),xv(d), r, vova
+	integer :: i,j,sm, sv, sm_new,xm(d),xnew(d),xv(d), r, vova
 
 	prevstatus=status; status='__hop_'; acpt=.false.
 
@@ -1274,8 +1274,8 @@ c	call CheckDropName(name);
 
 !--------- the row & det
 	do j=1,pm; vova=nm_clmn(j)
-	   xv=x(:,ksite(vova)); tv=ktau(vova)
-	   m_v(j) = GREENFUN(xv,tv,xnew,tnew) - GREENFUN(xv,tv,xm,tm)
+	   sv = ksite(vova); tv=ktau(vova)
+	   m_v(j) = GREENFUN(sv,tv,sm_new,tnew) - GREENFUN(sv,tv,sm,tm)
 	enddo
 
 	r=row(masha); det = det_r(pm,lda,matr,r,m_v)
@@ -1361,7 +1361,7 @@ c	call dance_dance                       ! dance-dance correlators
 	real*8 function diag_dens()
 
 	real*8 :: det,ti, tn
-	integer :: site, xn(d), xi(d), j, vova 
+	integer :: site, si, xn(d), xi(d), j, vova 
 
 ! select where to insert a kink
 	site=Nsite*rndm()+1.d0; if(site>Nsite)site=Nsite
@@ -1372,13 +1372,13 @@ c	call dance_dance                       ! dance-dance correlators
 	else
 
 	  do j=1,pm; vova=nm_row(j)               ! fill a column
-	     xi=x(:,ksite(vova)); ti=ktau(vova)
-	     m_u(j)  = GREENFUN(xn,tn,xi,ti)
+	     si = ksite(vova); ti=ktau(vova)
+	     m_u(j)  = GREENFUN(site, tn, si, ti)
 	  enddo
 
 	  do j=1,pm; vova=nm_clmn(j)             ! fill a row
-	     xi=x(:,ksite(vova)); ti=ktau(vova)
-	     m_v(j) = GREENFUN(xi,ti,xn,tn)
+	     si = ksite(vova); ti=ktau(vova)
+	     m_v(j) = GREENFUN(si, ti, site, tn)
 	  enddo
 
 	  m_s = g0000
@@ -1400,7 +1400,7 @@ c	call dance_dance                       ! dance-dance correlators
 !-----------------------------------------------
 	real*8 function diag_KE()
 
-	integer :: site1, site2, x1(d),x2(d), vova, xv(d), j, i
+	integer :: site1, site2, sv, x1(d),x2(d), vova, xv(d), j, i
 	real*8  :: t, det,tv
 !
 !  This estmator is for the tight-binding dispersion ONLY (n.n. sites)
@@ -1414,19 +1414,19 @@ c	call dance_dance                       ! dance-dance correlators
 	
 
 !------------- determinant
-	m_s = GREENFUN(x2,t,x1,t)        ! a corner 
+	m_s = GREENFUN(site2, t, site1, t)        ! a corner 
 
 	if(pm==0) then; det = m_s        
 	else
 
 	  do j=1,pm; vova=nm_row(j)               ! fill a column
-	     xv=x(:,ksite(vova)); tv=ktau(vova)
-	     m_u(j)  = GREENFUN(x2,t,xv,tv)
+	     sv = ksite(vova); tv=ktau(vova)
+	     m_u(j)  = GREENFUN(site2, t, sv, tv)
 	  enddo
 
 	  do j=1,pm; vova=nm_clmn(j)             ! fill a row
-	     xv=x(:,ksite(vova)); tv=ktau(vova)
-	     m_v(j) = GREENFUN(xv,tv,x1,t)
+	     sv = ksite(vova); tv=ktau(vova)
+	     m_v(j) = GREENFUN(sv, tv, site1, t)
 	  enddo
 
 	  det = det_p1(pm,lda,matr,m_u,m_v,m_z,m_s)   ! det ratio itself
@@ -1451,7 +1451,7 @@ c	call dance_dance                       ! dance-dance correlators
 ! the contributions to all L/2 distances
 !
 	real*8 :: det1,det2, t1, tv 
-	integer :: site1,site2, x1(d),x2(d),xv(d),j,vova, dir,i
+	integer :: site1,site2, sv, x1(d),x2(d),xv(d),j,vova, dir,i
 
 
 ! play two extra half-kinks
@@ -1469,8 +1469,8 @@ c	call dance_dance                       ! dance-dance correlators
 !--- determinantz
 	m_s = g0000
 
-	m_s2(1,1)=g0000; m_s2(1,2)=GREENFUN(x2,t1,x1,t1)
-	m_s2(2,2)=g0000; m_s2(2,1)=GREENFUN(x1,t1,x2,t1)
+	m_s2(1,1)=g0000; m_s2(1,2)=GREENFUN(site2, t1, site1, t1)
+	m_s2(2,2)=g0000; m_s2(2,1)=GREENFUN(site1, t1, site2, t1)
 
 
 	if(pm==0)then; det1=g0000**2; det2 = det1 - m_s2(1,2)*m_s2(2,1)
@@ -1478,14 +1478,14 @@ c	call dance_dance                       ! dance-dance correlators
 
 ! 1st for up-down
 	  do j=1,pm; vova=nm_row(j)               ! fill a column
-	     xv=x(:,ksite(vova)); tv=ktau(vova)
-	     m_u(j)  = GREENFUN(x1,t1,xv,tv)
+	     sv = ksite(vova); tv=ktau(vova)
+	     m_u(j)  = GREENFUN(site1, t1, sv, tv)
 	  enddo
 	  m_u2(1:pm,1)=m_u(1:pm)
 
 	  do j=1,pm; vova=nm_clmn(j)              ! fill a row
-	     xv=x(:,ksite(vova)); tv=ktau(vova)
-	     m_v(j) = GREENFUN(xv,tv,x1,t1)
+	     sv=ksite(vova); tv=ktau(vova)
+	     m_v(j) = GREENFUN(sv, tv, site1, t1)
 	  enddo
 	  m_v2(1,1:pm)=m_v(1:pm)
 
@@ -1493,14 +1493,14 @@ c	call dance_dance                       ! dance-dance correlators
 
 ! 2nd for up-down
 	  do j=1,pm; vova=nm_row(j)               ! fill a column
-	     xv=x(:,ksite(vova)); tv=ktau(vova)
-	     m_u(j)  = GREENFUN(x2,t1,xv,tv)
+	     sv = ksite(vova); tv=ktau(vova)
+	     m_u(j)  = GREENFUN(site2, t1, sv, tv)
 	  enddo
 	  m_u2(1:pm,2)=m_u(1:pm)
 
 	  do j=1,pm; vova=nm_clmn(j)             ! fill a row
-	     xv=x(:,ksite(vova)); tv=ktau(vova)
-	     m_v(j) = GREENFUN(xv,tv,x2,t1)
+	     sv = ksite(vova); tv=ktau(vova)
+	     m_v(j) = GREENFUN(sv, tv, site2, t1)
 	  enddo
 	  m_v2(2,1:pm)=m_v(1:pm)
 	  
@@ -2032,9 +2032,9 @@ c	endif
 !----------------------------------------------
 !---  Green Function, spline interpolation 
 !----------------------------------------------
-      real*8 function GREENFUN(x1,tau1,x2,tau2)
+      real*8 function GREENFUN(site1,tau1,site2,tau2)
       implicit none
-	integer :: x1(1:d), x2(1:d),j, sgn
+	integer :: x1(1:d), x2(1:d),j, sgn, site1, site2
       double precision :: tau, tau1, tau2, dt, gre
 
 	integer :: nx, ny, nz, nta  !, ntb
@@ -2057,6 +2057,7 @@ c	endif
 
 
 ! prepare coords, don't forger about PBC
+	x1 = x(:, site1); x2 = x(:, site2)
 	j=1; nx = abs(x1(j)-x2(j)); nx = min(nx,N(j)-nx)
 	j=2; ny = abs(x1(j)-x2(j)); ny = min(ny,N(j)-ny)
 	j=3; nz = abs(x1(j)-x2(j)); nz = min(nz,N(j)-nz)
@@ -2163,7 +2164,7 @@ cccccccccccccccccccccccccccccccccccccc
 
 ! fill g0000
 	xxx = 0; ttt=0.d0
-	g0000 = GREENFUN(xxx,ttt,xxx,ttt)
+	g0000 = GREENFUN(1, ttt, 1,ttt)
 
       end subroutine TABULATE
 
@@ -2222,7 +2223,7 @@ cccccccccccccccccccccccccccccccccccccc
 	integer :: pm,lda     ! actual size & leading dimension of A
       real*8  :: a(lda,lda)
 
-	integer :: i,j, vova, lesha, xi(d), xj(d)
+	integer :: i,j, vova, lesha, xi(d), xj(d), si, sj
 	real*8  :: ti,tj, det_big
 
 	if(pm<2)return   ! no use to recalculate
@@ -2232,9 +2233,10 @@ cccccccccccccccccccccccccccccccccccccc
 ! build the matrix
 	do j=1,pm; do i=1,pm
 	  vova=nm_row(i); lesha=nm_clmn(j)
+	  si = ksite(vova); sj = ksite(lesha)
 	  xi=x(:,ksite(vova)); xj=x(:,ksite(lesha))
 	  ti=ktau(vova); tj=ktau(lesha)
-	  a(i,j)=GREENFUN(xj,tj,xi,ti)
+	  a(i,j)=GREENFUN(sj, tj, si, ti)
 	enddo; enddo
 
 ! invert
@@ -2409,7 +2411,8 @@ c	if( dt<=rt_le )then
 !--------------------------------------------
       subroutine tab_leaps 
 
-	integer :: n_ev_total,site,ev,du3(d),ii,x1(d),x2(d),dx(d),j,i
+	integer :: n_ev_total,site, ev,du3(d),ii,x1(d),x2(d),dx(d),j,i
+	integer :: site0
 	real*8 :: du, t1,w1, dovesok
 
 	
@@ -2417,6 +2420,7 @@ c	if( dt<=rt_le )then
 
 	site=1; x1(:)=x(:,site); t1=0.d0
 	allocate( uzli(1:Nsite),yes(1:Nsite) ); n_le=cube(site,rx_le,uzli)
+	site0 = site
 
 	n_ev_total=nt_same*n_le
 	allocate(dx_le(d,n_ev_total),dt_le(n_ev_total),w_le(n_ev_total))
@@ -2442,7 +2446,7 @@ c	if( dt<=rt_le )then
 						! slightly different outputs --- and hence bug suspicion 
 						! [the author spend three days looking for such a spurious bug].
 			dovesok = ( dx(1)+dx(2)*N(1)+dx(3)*N(1)*N(2) ) * 1.d-14    
-		    w_le(ev) = GREENFUN(x1,t1,x2,t1+dt_le(ev))**2 + dovesok
+		    w_le(ev) = GREENFUN(site0,t1,site,t1+dt_le(ev))**2 + dovesok
 	   enddo
 	enddo
 
