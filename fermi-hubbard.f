@@ -40,6 +40,7 @@
 	real*8 :: U, U_in    ! MINUS interaction strength, initial for thermalization
 	real*8 :: beta       ! inverse temperature
 	real*8 :: mu         ! chem. potential
+	real*8, allocatable  :: musite(:)   ! site-dependent chem.potential
 	real*8 :: ef, kf     ! Fermi energy & momentum
 
       real*8 :: eta        ! GF- vs Z-sector weight
@@ -47,14 +48,13 @@
 	real*8,parameter :: gf_eta=1.038d0   ! 1 + GF anomalous dimension, U(1) universality class
 
 !--- Green function array
-	integer, parameter :: mt_max=500    ! Max. number of the mesh points for tau
-	integer, parameter :: ntab_max=20 ! Max. number of of sites per dimension for tabulation
+!d	integer, parameter :: mt_max=500    ! Max. number of the mesh points for tau
+!d	integer, parameter :: ntab_max=20 ! Max. number of of sites per dimension for tabulation
 	integer :: Ntab                   ! Actual Number of sites per dimension for tabulation
 	integer :: mtau
-	real*8 :: GR_DAT(0:mt_max+1,0:ntab_max-1,0:ntab_max-1,       
-     * 0:ntab_max-1)											! Green function array
-	real*8 :: GRD_DAT(0:mt_max+1,0:ntab_max-1,0:ntab_max-1,
-     * 0:ntab_max-1)											! Green function derivative
+
+	real*8, allocatable :: GR_DAT(:,:,:)	! Green function array
+	real*8, allocatable :: GRD_DAT(:,:,:)     ! Green function derivative
  
 	real*8 :: bmt, bmt1     ! a shorthand for beta/mtau, and its inverse
 
@@ -324,7 +324,7 @@
 !=== Main block :)
 !===============================================
 	program MAIN
-c	use mpi
+!	use mpi
 	use vrbls; use det_n2
 	use mumbers; use tree
 	implicit none 
@@ -337,9 +337,9 @@ c	use mpi
 ! first things first: start MPI 
 !    if you are not using MPI, uncomment an 'MPIstub' line below 
 !  
-c      call MPI_INIT( ierr )
-c      call MPI_COMM_RANK( MPI_COMM_WORLD, myrank, ierr )
-c      call MPI_COMM_SIZE( MPI_COMM_WORLD, numprcs, ierr )
+!      call MPI_INIT( ierr )
+!      call MPI_COMM_RANK( MPI_COMM_WORLD, myrank, ierr )
+!      call MPI_COMM_SIZE( MPI_COMM_WORLD, numprcs, ierr )
 
 ! MPIstub
 	myrank=0; numprcs=1;
@@ -403,21 +403,21 @@ c      call MPI_COMM_SIZE( MPI_COMM_WORLD, numprcs, ierr )
 !  This file is then fed to the service program which merges 
 !  and analyses the statistics.
 !
-c	if(prorab)then       
-c	   str=trim( myparfname(4:) )
-c	   anfname = 'an'//trim(str)
-c	   open(2,file=trim(anfname))
-c	    write(2,*)mygrpsize
-c	    do i=1,mygrpsize
-c	     write(istr,'(I3)') i
-c	     write(2,*)'stat'//trim(str)//'_'//trim(adjustl(istr))//'.dat'
-c	    enddo
-c	    write(2,*)str
-c	   close(2)
-c	endif
-c
-c      print*,'I am #', myrank,' - ',trim(myparfname), mygrpsize
-c	print*
+!	if(prorab)then       
+!	   str=trim( myparfname(4:) )
+!	   anfname = 'an'//trim(str)
+!	   open(2,file=trim(anfname))
+!	    write(2,*)mygrpsize
+!	    do i=1,mygrpsize
+!	     write(istr,'(I3)') i
+!	     write(2,*)'stat'//trim(str)//'_'//trim(adjustl(istr))//'.dat'
+!	    enddo
+!	    write(2,*)str
+!	   close(2)
+!	endif
+!
+!      print*,'I am #', myrank,' - ',trim(myparfname), mygrpsize
+!	print*
 
 
 	deallocate( grank, parnumb, gnum, parfname )
@@ -428,8 +428,7 @@ c	print*
 !------- Reading parameter file ------------------
 
 	open(OUT_UNIT,file=outputfname,position='append')      ! to be open until the MC starts
-	write(OUT_UNIT,*)'proc. #',myrank,' reads ',
-     &                    	myparfname,' ...'
+	write(OUT_UNIT,*)'proc. #',myrank,' reads ', myparfname,' ...'
 
       open( 1, file=trim(myparfname) )
       
@@ -461,9 +460,6 @@ c	print*
 		
 	read(1,*) eta          ! G- vs. Z-sector weight
 	read(1,*) mtau         ! # of points in \tau for tabulation of GFs
-						   ! Again, for inlining reasons it's necessary to have static variables here
-	   if(mtau>mt_max)then; print*,'mtau > mtau_max'; call mystop; 
-	   endif               
 	   bmt = beta/mtau; bmt1 = 1.d0/bmt                   ! shorthands
 	read(1,*) tolerance    ! det recalculation tolerance
 	read(1,*) rx_ca, rt_ca ! cre/ann x- and \tau- radii
@@ -533,6 +529,12 @@ c	print*
 	allocate (ass(dd,Nsite),back(dd),x(1:d,1:Nsite))
       CALL ASSA
 
+!--- Green functions
+	allocate( GR_DAT(0:mtau+1,1:Nsite,1:Nsite), GRD_DAT(0:mtau+1,1:Nsite,1:Nsite) )
+
+!--- site-dependent chemical potential
+	allocate( musite(1:Nsite) )
+
 !--- Configuration
 	allocate( nkink(1:Nsite), kname(nkink_m,1:Nsite) )  ! site data
 	allocate( ksite(-2:nmnm_max),ktau(-2:nmnm_max) )    ! global lists
@@ -567,10 +569,6 @@ c	print*
 !--- Tabulate Green functions
 	write(OUT_UNIT,*)'tabulating GFs...'  
 	Ntab=maxval(N(:)/2+1)                          ! the longest jump w/PBC is N/2
-	if(ntab>ntab_max)then; write(OUT_UNIT,*)'Ntab_max is too small'; 
-	call mystop; endif
-	if(mtau>mt_max)then; write(OUT_UNIT,*)'mt_max is too small'; 
-	call mystop; endif
 	call TABULATE 
 	write(OUT_UNIT,*)'...done'
 
@@ -836,7 +834,7 @@ c	print*
 
 	endif
 
-c	call CheckDropName(name);
+!	call CheckDropName(name);
 	call DropName(name)
 
 	a_d_v = a_d_v + un1
@@ -1013,8 +1011,7 @@ c	call CheckDropName(name);
 !------- check --------------------------------------
 	if(nmnm>=nmnm_max)then;                 ! too many kinks
 	   open(OUT_UNIT,file=outputfname,position='append')
-	   write(OUT_UNIT,*)'leap_add: nmnm > nmnm_max', nmnm,nmnm_max,
-     & 	    step
+	   write(OUT_UNIT,*)'leap_add: nmnm > nmnm_max', nmnm,nmnm_max, step
 	   close(OUT_UNIT)
 	   call mystop
 	endif
@@ -1109,7 +1106,7 @@ c	call CheckDropName(name);
 
 ! update configuration 
 
-c 	call CheckGetName; 
+! 	call CheckGetName; 
 	call GetName(name)
 	nk=nkink(sm); 
 	nkink(sm) = nk+1; kname(nk+1,sm) = name           ! on-site info
@@ -1235,7 +1232,7 @@ c 	call CheckGetName;
 	row(masha)=row(name); nm_row(row(masha))=masha
 
 ! erase the kink from the global list
-c	call CheckDropName(name); 
+!	call CheckDropName(name); 
 	call DropName(name)
 
 	a_l_d = a_l_d + 1.d0
@@ -1321,7 +1318,7 @@ c	call CheckDropName(name);
 	PE = PE + 1.d0*nmnm/beta               ! PE
 	KE = KE + diag_KE()                    ! KE
 	ndens = ndens + diag_dens()            ! number density 
-c	call dance_dance                       ! dance-dance correlators
+!	call dance_dance                       ! dance-dance correlators
 
 	endif  ! present
 
@@ -1629,8 +1626,7 @@ c	call dance_dance                       ! dance-dance correlators
 
 
 	write(1,fmt=771)nmnm,nm_max,nm_min,nm_av
- 771  format(' nmnm-> ',I5,' now [ max = ',I5,' min = ',I5,
-     &	   ' average = ',G11.5,' ]')
+ 771  format(' nmnm-> ',I5,' now [ max = ',I5,' min = ',I5,  ' average = ',G11.5,' ]')
 
 
 !--- pot. energy -----------------------------------
@@ -1677,8 +1673,7 @@ c	call dance_dance                       ! dance-dance correlators
 	write(1,*)' cre/ann  ',a_cre/(c_cre+.001),' / ',a_ann/(c_ann+.001)
 	write(1,*)' leap a/d ',a_l_a/(c_l_a+.001),' / ',a_l_d/(c_l_d+.001)
 	write(1,*)' hop        ',a_r/(c_r+.001)
-	write(1,*)' recalc / backsc ', recalc_rate/(step + 0.0001),' / ',
-     *							   i_backsc/(a_l_a + .0001)
+	write(1,*)' recalc / backsc ', recalc_rate/(step + 0.0001),' / ', i_backsc/(a_l_a + .0001)
 
 !---- nullify counters
       nm_max=0; nm_min=i_hu; nm_av=nul
@@ -1817,46 +1812,6 @@ c	call dance_dance                       ! dance-dance correlators
 	  write(1,*)g_uu(0:N2(1))
 	  write(1,*)g_ud(0:N2(1))
 	close(1)
-
-
-! parameters
-c	if( prorab )then          
-c
-! This writes the parameter file suitable for immediate restart with saved confguration and statistics.
-! This feature is useful if multiple runs are required [e.g. batch queueing with finite time limit]
-!
-c
-c      open(1,file='par'//trim(fnamesuffix)//'__')
-c	  write(1,*)d,'      ! Spatial dimension '
-c	  write(1,*)N(1),'      ! N(1) '
-c	  write(1,*)N(2),'      ! N(2) '
-c 	  write(1,*)N(3),'      ! N(3) '
-c	  write(1,*)1,'      ! 0 if new configuration, 1 if old one'
-c	  write(1,*)1,'      ! 0 if new statistics,    1 if old one'
-c	  write(1,*)1,'      ! 0 if new rndm() seed, 1 if read one'
-c	  write(1,*)mygrpsize, '      ! how many clones to run'
-c	  write(1,*)mu,  '      ! chem. pot '
-c	  write(1,*)U,U_in,'  ! - U & initial '
-c	  write(1,*)beta,  '      ! inverse temp. '
-c	  write(1,*)eta, '      ! GF vs. Z weight '
-c	  write(1,*)mtau, '      ! # of points in \tau for tabulation'
-c	  write(1,*)tolerance,'      ! det recalculation tolerance '
-c	  write(1,*)rx_ca, rt_ca,'      ! cre/ann x- and tau- radii '
-c	  write(1,*)rx_le, rt_le,'      ! leap_add/drop x- and tau- radii '
-c	  write(1,*)nt_same,  '      ! # of tau points for seeding'
-c	  write(1,*)0.d0, '      ! number of sweeps for thermolization '
-c	  write(1,*)step_p, '      ! step for printing'
-c	  write(1,*)step_w,'      ! step for writing to disk '
-c	  write(1,*)step_m,'      ! step for measuring '
-c	  write(1,*)time_limit/3600.d0,' time limit [hrs] '   
-c	  write(1,*)'------'
-c	  write(1,*)prob(1),'      ! add/drop '
-c	  write(1,*)prob(3)-prob(2),'      ! cre/ann '
-c	  write(1,*)prob(5)-prob(4),'      ! leap_add/drop '
-c	  write(1,*)prob(7)-prob(6),'      ! hop '
-c      close(1)
-c
-c	endif
 
 
 	write(OUT_UNIT,*)'writing done!'
@@ -2030,22 +1985,23 @@ c	endif
 
 
 !----------------------------------------------
-!---  Green Function, spline interpolation 
+!---  Green Function (former selector + spline interp.)
 !----------------------------------------------
       real*8 function GREENFUN(site1,tau1,site2,tau2)
       implicit none
-	integer :: x1(1:d), x2(1:d),j, sgn, site1, site2
+      integer :: site1,site2,j, sgn
       double precision :: tau, tau1, tau2, dt, gre
 
-	integer :: nx, ny, nz, nta  !, ntb
-	double precision :: tta,ttb,ga,gb,c, gra,grb   !,p
+      integer :: nx, ny, nz, nta  !, ntb
+      double precision :: tta,ttb,ga,gb,c, gra,grb   !,p
+
 
 ! prepare \tau
       tau=tau1-tau2
       dt=tau; sgn=1
 
 	if(tau < 1.d-14)then; dt=beta+tau; sgn=-1; endif
-! G(t=0) must be understood as G(t-> -0) = -G(t=\beta)
+! Explanation: G(t=0) must be understood as G(t-> -0) = -G(t=\beta)
 ! A long way to accomplish this is below, commented out. A short way is above :).
 !
 !     if (abs(tau) < 1.d-14) then; dt = beta; sgn=-1
@@ -2056,27 +2012,24 @@ c	endif
 
 
 
-! prepare coords, don't forger about PBC
-	x1 = x(:, site1); x2 = x(:, site2)
-	j=1; nx = abs(x1(j)-x2(j)); nx = min(nx,N(j)-nx)
-	j=2; ny = abs(x1(j)-x2(j)); ny = min(ny,N(j)-ny)
-	j=3; nz = abs(x1(j)-x2(j)); nz = min(nz,N(j)-nz)
+! prepare coords
+!	j=1; nx = abs(x1(j)-x2(j)); nx = min(nx,N(j)-nx)
+!	j=2; ny = abs(x1(j)-x2(j)); ny = min(ny,N(j)-ny)
+!	j=3; nz = abs(x1(j)-x2(j)); nz = min(nz,N(j)-nz)
 
 !----------------------------------- spline
 
-	nta=dt*bmt1    ! Recall, bmt=beta/mtau, bmt1=1/bmt 
+	nta=dt*bmt1 !*p
 
       tta=dt-nta*bmt 
-	ttb=tta - bmt   
-
-
-cccccccccccccccccccccccccccccccccccccc
+	ttb=tta - bmt     !dt-ntb*(beta/mtau) 
+!cccccccccccccccccccccccccccccccccccccc
       
-	ga=GR_DAT(nta,nx,ny,nz)
-	gb=GR_DAT(nta+1,nx,ny,nz)
+	ga=GR_DAT(nta,site1,site2)
+	gb=GR_DAT(nta+1,site1,site2)
 
-	gra=GRD_DAT(nta,nx,ny,nz)
-	grb=GRD_DAT(nta+1,nx,ny,nz)
+	gra=GRD_DAT(nta,site1,site2)
+	grb=GRD_DAT(nta+1,site1,site2)
 
       c=(ga-gb)*bmt1
 
@@ -2090,83 +2043,140 @@ cccccccccccccccccccccccccccccccccccccc
       end function GREENFUN
 
 
-
 !-------------------------------------
 !     Tabulates Green function and its time derivate at positive tau.
 !-------------------------------------
       subroutine TABULATE
       implicit none
-!
-! These tabulated values will be used in greenfun() for the spline interpolation. 
-!
-      integer :: mx, my, mz, i
-      integer :: nx, ny, nz,nt
-      double precision :: tau
-      double precision :: phase, eps, gamma !, xi
-      double precision :: pp(d), s1, s2, term
-      double precision :: co(-1000:1000,d)
+	real*8, allocatable :: ham(:,:)
+	integer :: site,site1,j
+	real*8 :: factor, ww,ttt,term, gamma, expet(0:mtau)
+	integer :: nt
 
-	integer :: xxx(1:d)
-	real*8 :: ttt
+	! lapack stuff
+	character*1 :: jobz,uplo
+	integer     :: ldh, lwork,info
+	real*8, allocatable  :: work(:), eps(:)
 
-	real*8 :: kx,ky,kz ,  expet(0:mtau), ww
+!	integer :: x1(d),x2(d) , site0
+
+	print*,'start with TABULATE'
+
+! check the array sizes
+!	if(Nsite>ntab_max)then
+!	    print*,' ******************************'
+!	    print*,' TABULATE: need to have ntab_max >= Nsite '
+!	    print*,' currently Nsite = ',Nsite, 'and ntab_max = ', ntab_max
+!	    call mystop
+!	endif
 
 
-	do i=1,d; pp(i)=4.d0*asin(1.d0)/N(i); enddo
 
- 
-!------------------ Cosines  ------------------
-      do i=1,d
-	  do mx=-N(i)/2+1, N(i)/2;                ! The single-particle dispersion is tight-binding,
-	          co(mx,i)=-2.d0*cos(pp(i)*mx);   ! thus the spectrum is cosine.
-	end do
+!--------- site-dependent chemical potential 
+	do site=1,Nsite
+!	   musite(site)=mu +  (2.d0*rndm() - 1.d0)*disord    ! FIXME
+	   musite(site) = mu
 	enddo
-!----------------------------------------------
 
-! nullify'em
+!!!        do site=1,Nsite
+!!!                print*, site, musite(site)
+!!!        enddo
+!!!        pause
+
+
+! build the hamiltonian
+	allocate(ham(1:Nsite,1:Nsite)) ; 
+	ham=0.d0
+	do site=1,Nsite
+	   ham(site,site)=ham(site,site)-musite(site)
+	   do j=1,dd; site1=ass(j,site); 
+	      ham(site,site1)=ham(site,site1)-1.d0  
+	   enddo
+	enddo;	
+
+!  compute eigenvalues; for LAPACK parameters and arguments, see
+!  http://www.netlib.org/lapack/double/dsyev.f
+!  SUBROUTINE DSYEV( JOBZ, UPLO, N, A, LDA, W, WORK, LWORK, INFO )
+
+	jobz='V'  ! compute eigenvectorz
+	uplo='U'  ! use upper diag of ham(:,:) --- doesn't matter really
+	ldh=Nsite
+	lwork=12*Nsite
+	allocate( work(lwork), eps(Nsite) )
+
+! query the optimal workspace size
+	call dsyev(jobz,uplo,Nsite,ham,ldh,eps,work,-1,info)
+	lwork=work(1)
+	deallocate(work); allocate(work(lwork))
+
+! diagonalize
+	call dsyev(jobz,uplo,Nsite,ham,ldh,eps,work,lwork,info)
+
+	if(info/=0)then; print*,'*** dsyev returns info = ', info
+			 print*,'*** check the TABULATE routine'
+			 call mystop
+	endif
+
+
+!	print*,'optimal lwork =', work(1),lwork
+!
+!	print*,'eigenvalues:'
+!	do j=1,Nsite
+!		print*,eps(j)
+!	enddo
+!
+!	print*; print*,'----------- eigenvector # '
+!	do j=1,Nsite;
+!		!write(1,*)j,ham(j,6)
+!		print*,j,ham(j,1)
+!	enddo
+!	print*; print*; print*
+
+!------------- have the spectrum, proceed to the GFs
 	GR_DAT=0.d0; GRD_DAT=0.d0	
 
-! sum over momentums 1st                 ! This weird loop sequence is UNAVOIDABLE
-	do mz=-N(3)/2+1, N(3)/2            ! in order to ensure the data locality:
-	do my=-N(2)/2+1, N(2)/2;           ! otherwise tabulation for L>10 takes
-      do mx=-N(1)/2+1, N(1)/2;           ! hours and hours.
+	do j=1,Nsite
 
-! spectrum
-        eps=co(mx,1)+co(my,2)+co(mz,3)-mu
-
-	  gamma=-eps*beta
+	  gamma=-eps(j)*beta
 	  gamma=exp(gamma)+1.d0
 	  gamma=-1.d0/gamma
 
-	  ww = exp(-eps*bmt)             ! bmt=beta/mtau
+	  ww = exp(-eps(j)*bmt) ! bmt=beta/mtau
 	  do nt=0,mtau; expet(nt)=ww**nt
 	  enddo
 
-! coordinates 
-          do nz = 0, Ntab-1; do ny = 0, Ntab-1;  do nx = 0, Ntab-1
-	       phase=pp(1)*nx*mx+pp(2)*ny*my+pp(3)*nz*mz
-	
-	       do nt=0,mtau
+          do site=1,Nsite ; do site1=1,Nsite
+	    factor = ham(site,j)*ham(site1,j)
+            do nt=0,mtau
+               term = factor*expet(nt)*gamma    !/Nsite
+               GR_DAT(nt,site,site1) = GR_DAT(nt,site,site1) + term
+               GRD_DAT(nt,site,site1) = GRD_DAT(nt,site,site1) -eps(j)*term
+            enddo
 
-		     term = cos(phase)*expet(nt)*gamma/Nsite
+          enddo; enddo ! site, site1
 
-		     GR_DAT(nt,nx,ny,nz) = GR_DAT(nt,nx,ny,nz) + term
-		     GRD_DAT(nt,nx,ny,nz) = GRD_DAT(nt,nx,ny,nz) -eps*term
-
-		enddo; enddo; enddo  ! coordinates
-	  enddo                  ! tau
-	enddo; enddo; enddo      ! momentum
+	enddo   ! j: eigenvalues
 !------------------------
 
 
 ! fill in fictitious nt=mtau+1, see GREENFUN for explanation
-	GR_DAT(mtau+1,:,:,:)=0.d0; GRD_DAT(mtau+1,:,:,:)=0.d0
+	GR_DAT(mtau+1,:,:)=0.d0; GRD_DAT(mtau+1,:,:)=0.d0
 
 ! fill g0000
-	xxx = 0; ttt=0.d0
-	g0000 = GREENFUN(1, ttt, 1,ttt)
+	site = 1; ttt=0.d0
+	g0000 = GREENFUN(site,ttt,site,ttt)
+!+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+!	site0=1; site1=site0
+!	do j=1,N(1)
+!	  print*,site0,site1,GR_DAT(100,site0,site1),GRD_DAT(100,site0,site1)
+!	  site1=ass(1,site1); site1=ass(2,site1)
+!	enddo
+
+	print*,'done with TABULATE'
 
       end subroutine TABULATE
+
 
 
 !-------------------------------
@@ -2353,10 +2363,10 @@ cccccccccccccccccccccccccccccccccccccc
 	n_uz = cube(site,rx,uzli)
 
 	 if(n_uz/=n_in)then                  ! these must be equal unless something very weird happened
-c		 open(OUT_UNIT,file=outputfname)
+!		 open(OUT_UNIT,file=outputfname)
 	     write(OUT_UNIT,*)'tab_cube: '
 	     write(OUT_UNIT,*)'n_in = ', n_in,'   n_uz = ',n_uz
-c	     close(OUT_UNIT)
+!	     close(OUT_UNIT)
 	     call mystop
 	 endif
 	uzli_cube(:,site) = uzli(1:n_uz)
@@ -2381,8 +2391,8 @@ c	     close(OUT_UNIT)
 	GOK = 1.d200      ! default value: \infty if outside of the box
 
 
-c	dt = abs(t1-t0); dt = min(dt, beta-dt)
-c	if( dt<=rt_le )then
+!	dt = abs(t1-t0); dt = min(dt, beta-dt)
+!	if( dt<=rt_le )then
 
 
 	dt=t1-t0; if(dt<0)dt=dt+beta
@@ -2598,8 +2608,7 @@ c	if( dt<=rt_le )then
 
 	open(OUT_UNIT,file=outputfname,position='append')
 	write(OUT_UNIT,*)' '
-	write(OUT_UNIT,*)'Thermalization [diag] will be done by ',
-     &	 n_sw,' sweeps'
+	write(OUT_UNIT,*)'Thermalization [diag] will be done by ', n_sw,' sweeps'
 	close(OUT_UNIT)
 
 	bun_in = beta*U_in*Nsite; bun_fin=bun
@@ -2643,8 +2652,7 @@ c	if( dt<=rt_le )then
 	enddo
 
 	open(OUT_UNIT,file=outputfname,position='append')
-	write(OUT_UNIT,*)'Thermalization done by ', step_t/1d6,
-     &	' mln steps'
+	write(OUT_UNIT,*)'Thermalization done by ', step_t/1d6, ' mln steps'
 	write(OUT_UNIT,*)'  '
 	close(OUT_UNIT)
 
@@ -2663,8 +2671,7 @@ c	if( dt<=rt_le )then
 
 	open(OUT_UNIT,file=outputfname,position='append')
 	write(OUT_UNIT,*)' '
-	write(OUT_UNIT,*)'Thermalization [worm] will be done by ',
-     &	 n_sw,' sweeps'
+	write(OUT_UNIT,*)'Thermalization [worm] will be done by ',  n_sw,' sweeps'
 	close(OUT_UNIT)
 
 	step_t = n_sw*bun
@@ -2706,8 +2713,7 @@ c	if( dt<=rt_le )then
 	enddo
 
 	open(OUT_UNIT,file=outputfname,position='append')
-	write(OUT_UNIT,*)'Thermalization done by ', step_t/1d6,
-     &	' mln steps'
+	write(OUT_UNIT,*)'Thermalization done by ', step_t/1d6, ' mln steps'
 	write(OUT_UNIT,*)'  '
 
 	if(n_sw>0) call wrt   
@@ -2752,7 +2758,7 @@ c	if( dt<=rt_le )then
 	if(allocated(m_c2))deallocate(m_c2)
 
 
-c	call MPI_FINALIZE( ierr )
+!	call MPI_FINALIZE( ierr )
 	stop
 
 	end subroutine mystop
