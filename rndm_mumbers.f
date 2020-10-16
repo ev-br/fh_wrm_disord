@@ -21,27 +21,27 @@
 
 !************************************************************************           
        SUBROUTINE SRANMAR(IJ,KL)
-C***********************************************************************
-C This is the initialization routine for the random number generator RANMAR()
-C NOTE: The seed variables can have values between:    0 <= IJ <= 31328
-C                                                      0 <= KL <= 30081
-C The random number sequences created by these two seeds are of sufficient
-C length to complete an entire calculation with. For example, if sveral
-C different groups are working on different parts of the same calculation,
-C each group could be assigned its own IJ seed. This would leave each group
-C with 30000 choices for the second seed. That is to say, this random
-C number generator can create 900 million different subsequences -- with
-C each subsequence having a length of approximately 10^30.
-C
-C Use IJ = 1802 & KL = 9373 to test the random number generator. The
-C subroutine RANMAR should be used to generate 20000 random numbers.
-C Then display the next six random numbers generated multiplied by 4096*4096
-C If the random number generator is working properly, the random numbers
-C should be:
-C             6533892.0  14220222.0  7275067.0
-C             6172232.0  8354498.0   10633180.0
-C***********************************************************************
-c     INTEGER IRAND
+!***********************************************************************
+! This is the initialization routine for the random number generator RANMAR()
+! NOTE: The seed variables can have values between:    0 <= IJ <= 31328
+!                                                      0 <= KL <= 30081
+! The random number sequences created by these two seeds are of sufficient
+! length to complete an entire calculation with. For example, if sveral
+! different groups are working on different parts of the same calculation,
+! each group could be assigned its own IJ seed. This would leave each group
+! with 30000 choices for the second seed. That is to say, this random
+! number generator can create 900 million different subsequences -- with
+! each subsequence having a length of approximately 10^30.
+!
+! Use IJ = 1802 & KL = 9373 to test the random number generator. The
+! subroutine RANMAR should be used to generate 20000 random numbers.
+! Then display the next six random numbers generated multiplied by 4096*4096
+! If the random number generator is working properly, the random numbers
+! should be:
+!             6533892.0  14220222.0  7275067.0
+!             6172232.0  8354498.0   10633180.0
+!***********************************************************************
+!     INTEGER IRAND
 
       INTEGER :: i7, k7, l7, j7,ii7, jj7, m7 , ij, kl
       DOUBLE PRECISION :: S, T
@@ -75,7 +75,7 @@ c     INTEGER IRAND
 !**************************************************************************** 
       DOUBLE PRECISION FUNCTION RNDM()
       DOUBLE PRECISION, parameter :: r1=5.d-15, r2=1.d-14     
-C***********************************************************************
+!***********************************************************************
       DOUBLE PRECISION :: RVAL
 
       RVAL = UGEN(I97) - UGEN(J97)

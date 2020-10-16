@@ -8,7 +8,7 @@
 	public :: make_tree, event, init_tree
 
 	private
-c	public
+!	public
 
 	integer :: nms                  ! max number of events
       integer :: namelast             ! last name in the list (real number of events)
@@ -52,7 +52,7 @@ c	public
 
       call MAKE_TREE
 
-c	print*,'ev0 = ',ev0
+!	print*,'ev0 = ',ev0
 
 
 	deallocate(sp)

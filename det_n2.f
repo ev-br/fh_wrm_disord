@@ -115,12 +115,7 @@
 !  Output: det. ratio:  det BIG / det SMALL (=1/rho)
 !
 
-!!! ******** TODO: razobrat'sya s SIGN'om ********
-
-
-c      det_m1 = 1.d0*(-1)**(c+r)/a(c,r)
-
-	s=-1; if(c/=pm)s=-s; if(r/=pm)s=-s
+	s=1; if(c/=pm)s=-s; if(r/=pm)s=-s
 	det_m1 = 1.d0*s/a(c,r)
 
       end function det_m1

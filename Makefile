@@ -4,7 +4,7 @@
 #OUT = a.i.out
 
 # GNU
-FF = gfortran -O2
+FF = gfortran -O2 -ffree-form
 LIBS = -lblas -llapack   # on a laptop
 OUT= a.out
 
