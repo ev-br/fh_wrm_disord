@@ -40,6 +40,7 @@
 	real*8 :: U, U_in    ! MINUS interaction strength, initial for thermalization
 	real*8 :: beta       ! inverse temperature
 	real*8 :: mu         ! chem. potential
+	real*8 :: disorder_amp   ! disorder amplitude
 	real*8, allocatable  :: musite(:)   ! site-dependent chem.potential
 	real*8 :: ef, kf     ! Fermi energy & momentum
 
@@ -332,7 +333,7 @@
 	logical :: acpt                   ! accepted update flag
 	integer :: ddd, i,j,i1, ans1, ans2, ans3 , dummy
 	real*8  :: r, dp, det , dt
-      character*6 :: cvoid
+      character*6 :: cvoid, version_tag
 
 ! first things first: start MPI 
 !    if you are not using MPI, uncomment an 'MPIstub' line below 
@@ -432,6 +433,11 @@
 
       open( 1, file=trim(myparfname) )
       
+      read(1, *)version_tag
+      if(version_tag /= "__v1__")then
+	 print*,'parameters: expected __v1__, got ', version_tag, '. STOP.'
+	 call mystop
+      endif
       read(1,*) ddd        ! Global dimension
 	if(ddd/=d)then; print*,'d/=3'; call mystop; endif
 
@@ -453,6 +459,7 @@
 	  endif
 	
 	read(1,*) mu            ! Chemical potential
+	read(1,*) disorder_amp  ! Disorder amplitude
 	read(1,*) U,U_in        ! - U, interaction, & initial for thermalization
 	read(1,*) beta          ! Inverse temperature
 	    bun = beta*U*Nsite  ! Shorthand
