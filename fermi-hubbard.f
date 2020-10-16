@@ -41,7 +41,8 @@
 	real*8 :: beta       ! inverse temperature
 	real*8 :: mu         ! chem. potential
 	real*8 :: disorder_amp   ! disorder amplitude
-	real*8, allocatable  :: musite(:)   ! site-dependent chem.potential
+	real*8, allocatable  :: musite(:)    ! site-dependent chem.potential
+	integer              :: replica_id  ! replica ID (read from the disorder file) 
 	real*8 :: ef, kf     ! Fermi energy & momentum
 
       real*8 :: eta        ! GF- vs Z-sector weight
@@ -313,9 +314,6 @@
 !  checked in the printouts, and as it exceeds the limit, the process 
 !  saves and wraps up.
 
-
-
-
 	end module vrbls
 
 
@@ -331,7 +329,7 @@
 	implicit none 
 
 	logical :: acpt                   ! accepted update flag
-	integer :: ddd, i,j,i1, ans1, ans2, ans3 , dummy
+	integer :: ddd, i,j,i1, ans1, ans2, ans3, dummy
 	real*8  :: r, dp, det , dt
       character*6 :: cvoid, version_tag
 
@@ -459,7 +457,7 @@
 	  endif
 	
 	read(1,*) mu            ! Chemical potential
-	read(1,*) disorder_amp  ! Disorder amplitude
+	read(1,*) disorder_amp  ! Disorder amplitudean
 	read(1,*) U,U_in        ! - U, interaction, & initial for thermalization
 	read(1,*) beta          ! Inverse temperature
 	    bun = beta*U*Nsite  ! Shorthand
@@ -572,6 +570,10 @@
 	allocate( distance(1:nkink_m) )
 
 !------------ DONE with memory allocation, proceed to tabulations
+
+!--- Site-dependent chemical potential
+	call RD_DISORD         ! read the replica
+
 
 !--- Tabulate Green functions
 	write(OUT_UNIT,*)'tabulating GFs...'  
@@ -1625,6 +1627,7 @@
       write(1,*)' '
 	write(1,*)' 1/T  = ', beta, '  -U  = ', bun/beta/Nsite
 	write(1,*)' \mu  = ', mu, ' nnn = ', g0000
+	write(1, *)' amp = ', disorder_amp, '  replica id = ', replica_id
 	write(1,*)'  '
 
       write(1,*)' MC step (mln) =', step/1.d6,'  Z(mln) = ',Z/1.d6
@@ -1755,7 +1758,7 @@
 ! time to wrap up? --- write everything, release allocated memory and wrap up.
 	if(lastone)then; 
 	    open(1,file=outputfname,position='append')
-		write(1,*)'Time to wrap up, dude..'; 
+		write(1,*)'Time to wrap up.'; 
 		close(1)
 	    call wrt
 		call mystop
@@ -1991,6 +1994,59 @@
 	end subroutine init_cnf
 
 
+
+!----------------------------------------------
+!---  Init the site-dependent chemical potential
+!----------------------------------------------
+!!	subroutine init_disord
+!!	implicit none
+!!	integer :: site
+!!	
+!!      DO NOT USE: ONLY USE PRE-GENERATED REPLICAS
+!!
+!!	do site=1, Nsite
+!!	   musite(site) = mu + (2.d0*rndm() - 1.d0)*disorder_amp
+!!	enddo
+!!	
+!!	end subroutine init_disord
+
+
+
+!----------------------------------------------
+!---  Read in the site-dependent chemical potential
+!----------------------------------------------
+	subroutine rd_disord
+	implicit none
+	integer :: L
+	real*8 :: dis_amp
+
+	open(OUT_UNIT,file=outputfname,position='append')
+	write(OUT_UNIT,*)'reading the replica.....'
+	
+	open(1,file='disord'//trim(fnamesuffix)//'.dat')
+	read(1, *) replica_id     ! np.random.seed the replica is generated with
+
+	read(1, *) L
+		if(L /= N(1))then
+			print*, "Disorder replica: L = ", L, ' /= N(1) =', N(1);
+			call mystop
+		endif
+	read(1, *) musite
+	close(1)
+
+!	print*, '-----------'
+!	print*, musite
+!	pause
+
+	musite = musite*disorder_amp + mu
+
+	write(OUT_UNIT,*)'... done'
+	close(OUT_UNIT)
+	
+	end subroutine rd_disord
+
+
+
 !----------------------------------------------
 !---  Green Function (former selector + spline interp.)
 !----------------------------------------------
@@ -2077,18 +2133,10 @@
 !	    call mystop
 !	endif
 
-
-
-!--------- site-dependent chemical potential 
-	do site=1,Nsite
-!	   musite(site)=mu +  (2.d0*rndm() - 1.d0)*disord    ! FIXME
-	   musite(site) = mu
-	enddo
-
-!!!        do site=1,Nsite
-!!!                print*, site, musite(site)
-!!!        enddo
-!!!        pause
+!        do site=1,Nsite
+!                print*, site, musite(site)
+!        enddo
+!        pause
 
 
 ! build the hamiltonian
