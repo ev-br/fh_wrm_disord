@@ -60,7 +60,7 @@
  
 	real*8 :: bmt, bmt1     ! a shorthand for beta/mtau, and its inverse
 
-	real*8 :: g0000         ! green function w/ all arg = 0, non-interacting density
+	real*8, allocatable :: g0000(:)       ! green function w/ all arg = 0, non-interacting density
 
 !------------------------------------------------------
 !     Sites and Associations
@@ -420,6 +420,7 @@
 
 !--- site-dependent chemical potential
 	allocate( musite(1:Nsite) )
+	allocate( g0000(1:Nsite) )
 
 !--- Configuration
 	allocate( nkink(1:Nsite), kname(nkink_m,1:Nsite) )  ! site data
@@ -616,7 +617,7 @@
 	tnew = beta*rndm()                    ! select tau		
 
 !------------- determinant
-	if(pm==0)then; det=g0000  !ratio = g0000**2
+	if(pm==0)then; det=g0000(site)  !ratio = g0000**2
 	else
 
 ! ira-masha 
@@ -633,7 +634,7 @@
 	   m_v(clmn(vova)) = GREENFUN(ksite(vova), tv, site, tnew)
 	   m_u(row(vova))  = GREENFUN(site, tnew, ksite(vova), tv)
 	enddo
-	m_s = g0000
+	m_s = g0000(site)
 	det = det_p1(pm,lda,matr,m_u,m_v,m_z,m_s)   ! det ratio itself
 
 	endif  ! pm==0
@@ -658,7 +659,7 @@
 	ksite(name)=site; ktau(name)=tnew                ! global list
 
 	if(pm==0)then                                    ! update TheMatrix
-	   pm=1; matr(pm,pm)=1.d0/g0000
+	   pm=1; matr(pm,pm)=1.d0/g0000(site)
 	else
 	   call inv_p1(pm,lda,matr,det,m_v,m_w,m_z)        
 	endif
@@ -1255,7 +1256,7 @@
 	xn(:)=x(:,site); tn=beta*rndm()
 	
 !------------- determinant
-	if(nmnm==0)then; det=g0000  
+	if(nmnm==0)then; det=g0000(site)
 	else
 
 	  do j=1,pm; vova=nm_row(j)               ! fill a column
@@ -1268,7 +1269,7 @@
 	     m_v(j) = GREENFUN(si, ti, site, tn)
 	  enddo
 
-	  m_s = g0000
+	  m_s = g0000(site)
 
 	  det = det_p1(pm,lda,matr,m_u,m_v,m_z,m_s)   ! det ratio itself
 
@@ -1330,7 +1331,7 @@
 
 
 !--------------------------------
-!--- measure density-density correlators
+!--- measure density-density correlators : FIXME g0000
 !--------------------------------
 	subroutine dance_dance()
 !
@@ -1340,6 +1341,10 @@
 	real*8 :: det1,det2, t1, tv 
 	integer :: site1,site2, sv, x1(d),x2(d),j,vova, dir,i
 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	print*, "DANCE DANCE g0000 FIXME"
+	stop
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 ! play two extra half-kinks
 	site1=Nsite*rndm()+1.d0; if(site1>Nsite)site1=Nsite
@@ -1354,13 +1359,13 @@
 
 
 !--- determinantz
-	m_s = g0000
+!!	m_s = g0000
 
-	m_s2(1,1)=g0000; m_s2(1,2)=GREENFUN(site2, t1, site1, t1)
-	m_s2(2,2)=g0000; m_s2(2,1)=GREENFUN(site1, t1, site2, t1)
+!!	m_s2(1,1)=g0000; m_s2(1,2)=GREENFUN(site2, t1, site1, t1)
+!!	m_s2(2,2)=g0000; m_s2(2,1)=GREENFUN(site1, t1, site2, t1)
 
 
-	if(pm==0)then; det1=g0000**2; det2 = det1 - m_s2(1,2)*m_s2(2,1)
+	if(pm==0)then; det1=g0000(site1)**2; det2 = det1 - m_s2(1,2)*m_s2(2,1)
 	else
 
 ! 1st for up-down
@@ -1507,7 +1512,7 @@
 
       write(1,*)' '
 	write(1,*)' 1/T  = ', beta, '  -U  = ', bun/beta/Nsite
-	write(1,*)' \mu  = ', mu, ' nnn = ', g0000
+	write(1,*)' \mu  = ', mu, ' av nnn = ', sum(g0000)/Nsite
 	write(1, *)' amp = ', disorder_amp, '  replica id = ', replica_id
 	write(1,*)'  '
 
@@ -1996,8 +2001,6 @@
 	integer     :: ldh, lwork,info
 	real*8, allocatable  :: work(:), eps(:)
 
-!	integer :: x1(d),x2(d) , site0
-
 	print*,'start with TABULATE'
 
 ! check the array sizes
@@ -2093,8 +2096,17 @@
 	GR_DAT(mtau+1,:,:)=0.d0; GRD_DAT(mtau+1,:,:)=0.d0
 
 ! fill g0000
-	site = 1; ttt=0.d0
-	g0000 = GREENFUN(site,ttt,site,ttt)
+	ttt=0.d0
+	do site=1, Nsite
+		g0000(site) = GREENFUN(site,ttt,site,ttt)
+	enddo
+	
+!	do site=1, Nsite
+!	print*, site, GREENFUN(site, ttt, site, ttt)
+!	enddo
+	
+!	print*, "mean value = ", sum(g0000) / Nsite
+!	pause
 !+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 !	site0=1; site1=site0
