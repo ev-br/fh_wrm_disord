@@ -1,3 +1,17 @@
 *.mod
 *.out
-*/.ipynb_checkpoints
+.ipynb_checkpoints
+
+# service stuff in the tests/ folder
+tests/rndm_*dat
+tests/ct3d_*dat
+tests/det_*dat
+tests/cnf_*dat
+tests/stat_*dat
+
+tests/*/*/rndm_*dat
+tests/*/*/ct3d_*dat
+tests/*/*/det_*dat
+tests/*/*/cnf_*dat
+tests/*/*/stat_*dat
+
