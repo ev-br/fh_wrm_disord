@@ -294,9 +294,9 @@
 	implicit none 
 
 	logical :: acpt                   ! accepted update flag
-	integer :: ddd, i,j,i1, ans1, ans2, ans3, dummy
+	integer :: ddd, i, ans1, ans2, ans3
 	real*8  :: r, dp, det , dt
-        character*6 :: cvoid, version_tag
+	character*6 :: cvoid, version_tag
 
 
 ! ------- pi pi pi pi ------------
@@ -593,7 +593,7 @@
 	real*8  :: det              ! det value to be returned to the main loop
 
 	real*8  :: ratio
-	integer :: name, site,j,nk, xnew(d), xi(d),xm(d),xv(d),vova
+	integer :: name, site,j,nk, xnew(d), vova
 	real*8  :: tnew, ti, tm, tv
 
 	c_a_v = c_a_v + un1; acpt=.false.
@@ -740,7 +740,7 @@
 	real*8  :: det
 
       real*8 :: ti,tm,tv,ratio, gim
-      integer :: si,sm, sv, xv(d),xi(d),xm(d) ,j, vova, jm
+      integer :: si,sm, sv, xi(d),xm(d) ,j, vova, jm
 
 	prevstatus=status; status='create'; acpt=.false.
 
@@ -1142,7 +1142,7 @@
 	real*8  :: det
 
 	real*8 :: ratio, tm, tv, tnew  
-	integer :: i,j,sm, sv, sm_new,xm(d),xnew(d),xv(d), r, vova
+	integer :: i,j,sm, sv, sm_new,xm(d),xnew(d), r, vova
 
 	prevstatus=status; status='__hop_'; acpt=.false.
 
@@ -1248,7 +1248,7 @@
 	real*8 function diag_dens()
 
 	real*8 :: det,ti, tn
-	integer :: site, si, xn(d), xi(d), j, vova 
+	integer :: site, si, xn(d), j, vova 
 
 ! select where to insert a kink
 	site=Nsite*rndm()+1.d0; if(site>Nsite)site=Nsite
@@ -1287,7 +1287,7 @@
 !-----------------------------------------------
 	real*8 function diag_KE()
 
-	integer :: site1, site2, sv, x1(d),x2(d), vova, xv(d), j, i
+	integer :: site1, site2, sv, x1(d),x2(d), vova, j, i
 	real*8  :: t, det,tv
 !
 !  This estmator is for the tight-binding dispersion ONLY (n.n. sites)
@@ -1338,7 +1338,7 @@
 ! the contributions to all L/2 distances
 !
 	real*8 :: det1,det2, t1, tv 
-	integer :: site1,site2, sv, x1(d),x2(d),xv(d),j,vova, dir,i
+	integer :: site1,site2, sv, x1(d),x2(d),j,vova, dir,i
 
 
 ! play two extra half-kinks
@@ -1461,7 +1461,7 @@
 !--- Print out and check the runtime
 !------------------------------------
 	subroutine prnt
-	integer :: i,j, name
+	integer :: i,j
 	real*8 :: xxx, yyy, dt 
 
 	real*8 :: PE_av, PE_err, KE_av, KE_err, im_av, im_err
@@ -1781,7 +1781,6 @@
 	subroutine rd_cnf
 	integer :: j,name, site
 	real*8  :: bbb, f
-	character*50 :: rndmstr
 
 	open(OUT_UNIT,file=outputfname,position='append')
 	write(OUT_UNIT,*)'reading conf.....'
@@ -1895,7 +1894,6 @@
 	subroutine rd_disord
 	implicit none
 	integer :: L
-	real*8 :: dis_amp
 
 	open(OUT_UNIT,file=outputfname,position='append')
 	write(OUT_UNIT,*)'reading the replica.....'
@@ -1929,10 +1927,10 @@
 !----------------------------------------------
       real*8 function GREENFUN(site1,tau1,site2,tau2)
       implicit none
-      integer :: site1,site2,j, sgn
+      integer :: site1,site2, sgn
       double precision :: tau, tau1, tau2, dt, gre
 
-      integer :: nx, ny, nz, nta  !, ntb
+      integer :: nta  !, ntb
       double precision :: tta,ttb,ga,gb,c, gra,grb   !,p
 
 
