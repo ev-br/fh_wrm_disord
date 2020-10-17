@@ -278,41 +278,7 @@
 
 
 ! MPIzation related, see below:
-	integer :: ierr, myrank, numprcs
-
-	integer :: nfls                           ! how many different groups [ = parameter files ]
-	integer, allocatable :: gnum(:)           ! how many processes per group
-	character*50, allocatable :: parfname(:)  ! list of parameter files
-
-	integer, allocatable :: grank(:)          ! 'rank' within the group
-	integer, allocatable :: parnumb(:)        ! parameter file for a given process
-
-	character*50 :: myparfname, fnamesuffix, outputfname
-	character*50 :: str,istr, anfname, rndmstr                     ! service vrbls
-
-	logical :: prorab                  ! one process of a group will do extra writing
-	integer :: mygrpsize, mygrank      ! size of my group, mygrank
-	character*3  :: mygrankstr
-
-
-!  Working protocol: First, the file named 'infile' is read. The format is:
-!
-!    nfls
-!    nc_1      par_XXX
-!    nc_2      par_YYY
-!    ........
-!    nc_nfls   par_ZZZ
-!
-!  Here nfls is the number of different parameter files, and nc_i is the number
-!  of clones to run per i-th parameter set. The latter number must match the 
-!  corresponding entry in the parameter file.
-!
-!  For a parameter file par_XXX, _XXX is used as a suffix for all the output:
-!    stat_XXX_#.dat, out_XXX_#.out etc, where # is the number of a clone (1...nc_i).
-!
-!  Parameter file also contains the walltime limit in hours. System time is
-!  checked in the printouts, and as it exceeds the limit, the process 
-!  saves and wraps up.
+	character*50 :: myparfname, fnamesuffix, outputfname, rndmstr
 
 	end module vrbls
 
@@ -323,7 +289,6 @@
 !=== Main block :)
 !===============================================
 	program MAIN
-!	use mpi
 	use vrbls; use det_n2
 	use mumbers; use tree
 	implicit none 
@@ -331,18 +296,8 @@
 	logical :: acpt                   ! accepted update flag
 	integer :: ddd, i,j,i1, ans1, ans2, ans3, dummy
 	real*8  :: r, dp, det , dt
-      character*6 :: cvoid, version_tag
+        character*6 :: cvoid, version_tag
 
-! first things first: start MPI 
-!    if you are not using MPI, uncomment an 'MPIstub' line below 
-!  
-!      call MPI_INIT( ierr )
-!      call MPI_COMM_RANK( MPI_COMM_WORLD, myrank, ierr )
-!      call MPI_COMM_SIZE( MPI_COMM_WORLD, numprcs, ierr )
-
-! MPIstub
-	myrank=0; numprcs=1;
-!-----------------
 
 ! ------- pi pi pi pi ------------
 	pi = 4.d0*atan(1.d0)
@@ -355,85 +310,25 @@
 	time_prev=0.d0; time_elapsed = 0.d0; hr_prev = 0
 
 
-!------- Read the parameter file names --------
-	open(1,file='infile')    ! infile lists parameter files: par_XXX
+!--------- Get the par-file name from the command line --------------
+        call  GETARG(1 , myparfname)
 
-	read(1,*)nfls
-	allocate( gnum(1:nfls), parfname(1:nfls) )
-						     
-	do i=1, nfls         ! XXX is used as a suffix for all the output
-	  read(1,*)gnum(i), parfname(i)        
-	enddo
+        ! determine the suffix for output files
+        fnamesuffix = myparfname(4:)
 
-	close(1)
-
-
-! assign granks within groups
-	i1=0; allocate( grank(1:sum(gnum)), parnumb(1:sum(gnum)) )
-	do i=1,nfls
-	  do j=1,gnum(i)
-		  i1 = i1 + 1
-	      grank(i1) = j;  parnumb(i1)=i
-	  enddo
-	enddo
-
-! rank-specific parameter file & suffix
-	mygrpsize = gnum( parnumb(myrank+1) ); mygrank = grank( myrank+1 )
-	myparfname=parfname( parnumb(myrank+1) )    
-	fnamesuffix = myparfname(4:)  ! parfname MUST be at least 5 characters long: par_XXX etc
-
-	write(mygrankstr,'(I3)') mygrank   ! convert mygrank into mygrankstr
-	fnamesuffix = trim(fnamesuffix)//'_'//trim(adjustl(mygrankstr))
-
-	outputfname = 'out'//trim(fnamesuffix)   ! send output here
-
-	prorab=.false.;  if( mygrank==1 )prorab=.true.
-
-! save analysis template ---- Only useful in MPI mode
-!
-!  This writes out an 'analysis template', that is
-!    the set of filenames of the statistics files, e.g.
-!
-!     3
-!     stat_1.dat
-!     stat_2.dat
-!     stat_3.dat
-!
-!  This file is then fed to the service program which merges 
-!  and analyses the statistics.
-!
-!	if(prorab)then       
-!	   str=trim( myparfname(4:) )
-!	   anfname = 'an'//trim(str)
-!	   open(2,file=trim(anfname))
-!	    write(2,*)mygrpsize
-!	    do i=1,mygrpsize
-!	     write(istr,'(I3)') i
-!	     write(2,*)'stat'//trim(str)//'_'//trim(adjustl(istr))//'.dat'
-!	    enddo
-!	    write(2,*)str
-!	   close(2)
-!	endif
-!
-!      print*,'I am #', myrank,' - ',trim(myparfname), mygrpsize
-!	print*
-
-
-	deallocate( grank, parnumb, gnum, parfname )
-
-!================= DONE with MPI-related stuff, the work is been distributed over processes
+        outputfname = 'out'//trim(fnamesuffix)   ! send output here
 
 
 !------- Reading parameter file ------------------
 
-	open(OUT_UNIT,file=outputfname,position='append')      ! to be open until the MC starts
-	write(OUT_UNIT,*)'proc. #',myrank,' reads ', myparfname,' ...'
+        open(OUT_UNIT,file=outputfname,position='append')      ! to be open until the MC starts
+        write(OUT_UNIT,*) ' reading ', myparfname,' ...'
 
-      open( 1, file=trim(myparfname) )
+        open( 1, file=trim(myparfname) )
       
       read(1, *)version_tag
-      if(version_tag /= "__v1__")then
-	 print*,'parameters: expected __v1__, got ', version_tag, '. STOP.'
+      if(version_tag /= "__v2__")then
+	 print*,'parameters: expected __v2__, got ', version_tag, '. STOP.'
 	 call mystop
       endif
       read(1,*) ddd        ! Global dimension
@@ -449,12 +344,6 @@
 	read(1,*) ans1  ! 0 if new configuration, 1 if old one
 	read(1,*) ans2  ! 0 if new statistics,    1 if old one
 	read(1,*) ans3  ! 0 if new rndm() seed, 1 if read one
-
-	read(1,*) dummy  ! Group size; to be equal to mygrpsize; 
-	  if(dummy/=mygrpsize)then;         ! Otherwise program will crash with a mysterious error message
-	     print*,' mygrpsize problem @', trim(myparfname)
-	     call mystop
-	  endif
 	
 	read(1,*) mu            ! Chemical potential
 	read(1,*) disorder_amp  ! Disorder amplitudean
@@ -499,19 +388,11 @@
 !  Otherwise the program crashes with mysterious error message
 !
 !
-	if(ans3==0)then     ! init rndm() state
+       if(ans3==0)then     ! init rndm() state
 
-	  read(1,*)cvoid
-
-	  allocate( ar_ij(1:mygrpsize), ar_kl(1:mygrpsize) )
-
-	  do i=1,mygrpsize
-	     read(1,*) ar_ij(i),ar_kl(i)    ! random number generator seed
-	  enddo
-	  r_ij = ar_ij(mygrank); r_kl=ar_kl(mygrank)  
-	  call init_rndm(r_ij,r_kl)
-	  
-	  deallocate(ar_ij,ar_kl)
+          read(1,*)cvoid
+          read(1,*) r_ij,r_kl
+          call init_rndm(r_ij,r_kl)
 
 	else                ! read rndm() state
 
@@ -1690,8 +1571,6 @@
 
 !=============================  writeouts: various service distributions
 
-	if(prorab)then         
-	                 ! In MPI mode, it's useful to have only asingle file for a group
 
 ! write t(ira-masha) distribution
 	if(im_t(0)>0)then;	yyy = PE_av/U/Nsite/im_t(0)
@@ -1725,8 +1604,6 @@
 	enddo
 	close(2)
 
-
-	endif   ! prorab
 
 !---------  uncomment this if you want to see the configuration -----------
 
