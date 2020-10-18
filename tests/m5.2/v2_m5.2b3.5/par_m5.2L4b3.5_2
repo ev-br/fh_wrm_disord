@@ -7,7 +7,7 @@ __v2__    ! version tag
 0         ! 0 if new statistics,    1 if old one
 0         ! 0 if new rndm() seed
 -5.2d0              ! \mu
-0.0       ! disorder amplitude
+0.1       ! disorder amplitude
 7.915d0  0.015d0     ! - U, initial for thermalization
 3.5d0               ! \beta
 5.1d0      ! eta: GF vs Z weight
