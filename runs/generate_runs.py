@@ -10,7 +10,7 @@ import stat
 ROOT = "~/fhdw/"
 
 # @ duneyrr
-ROOT = "~/sweethome/ferm/worm_disord/"
+#ROOT = "~/sweethome/ferm/worm_disord/"
 
 ROOT = os.path.expanduser(ROOT)
 
@@ -110,7 +110,7 @@ if __name__ == "__main__":
         r_path = "disord_L%sr%s.dat" % (dct["L"], replica)
         r_path = os.path.join(REPLICAS_STORE, r_path)
         shutil.copy(r_path,
-                    os.path.join(TARGET_PATH, "disord_%s" % dct["suffix"]))
+                    os.path.join(TARGET_PATH, "disord_%s.dat" % dct["suffix"]))
 
     # write out the run file to queue them all
     for sf in sbatch_files:
