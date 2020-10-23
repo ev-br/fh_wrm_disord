@@ -103,7 +103,7 @@ def write_out_one(base_dct, replica, par_template=None):
 
     # sanity check:
     # FIXME
-    if dct["stat"] != "0" and float(dct["therm"]) != 0:
+    if float(dct["stat"]) != 0 and float(dct["therm"]) != 0:
         print("!!! ", parfname, "stat & therm")
 
     
