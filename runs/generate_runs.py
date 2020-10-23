@@ -10,10 +10,11 @@ import stat
 ROOT = "~/fhdw/"
 
 # @ duneyrr
-#ROOT = "~/sweethome/ferm/worm_disord/"
+ROOT = "~/sweethome/ferm/worm_disord/"
 
 ROOT = os.path.expanduser(ROOT)
 
+# FIXME: obsolete
 REPLICAS_STORE = os.path.join(ROOT, "replicas")
 TARGET_PATH = os.path.join(ROOT, "runs/L4b3.5")
 
@@ -31,22 +32,22 @@ r"""__v2__    ! version tag
 %(amp)s       ! disorder amplitude
 7.915d0  0.015d0     ! - U, initial for thermalization
 %(beta)sd0               ! \beta
-5.1d0      ! eta: GF vs Z weight
+0.8d0      ! eta: GF vs Z weight
 500       ! number of \tau points for GF tabulation
 1.d2      ! tolerance level for determinant recalculation
-0  0.1d0  ! x- and \tau- radii for cre/ann
-1  0.1d0  ! x- and \tau- radii for leap_add/drop
-20       ! nt
+0  1.0d0  ! x- and \tau- radii for cre/ann
+1  1.4d0  ! x- and \tau- radii for leap_add/drop
+100       ! nt
 %(therm)s         ! number of sweeps for thermalization
 2.d7     ! step for printing
 6.d7      ! step for writing to disk
 1.d0      ! step for measuring
-6.0       ! time limit, hrs
+16.0       ! time limit, hrs
 ------
 0.0       ! add/drop
 0.1       ! cre/ann
-0.35      ! leap_add/drop
-0.1     ! hop
+0.25      ! leap_add/drop
+0.3     ! hop
 ------
 %(seed1)s %(seed2)s
 4836 2738
@@ -72,9 +73,60 @@ def get_suffix(dct):
 base_dct = {"L": 4, "amp": "0.1", "beta": "3.5",   # physical
             "seed1": 4836, "seed2": 2738,
             "replica" : "1",
-            "cnf": 0, "stat": 0, "therm": "1d2",   # new or restart
+            "cnf": 0, "stat": 0, "therm": "1e2",   # new or restart
             "step_p": "2d7", "step_w": "6d7",      # printout/checkpoint
        }
+
+
+
+def write_out_one(base_dct, replica, par_template=None):
+    """Write out a single par/slurm file, return the sbatch line."""
+
+    if par_template is None:
+        par_template = PAR_TEMPLATE
+
+    dct = base_dct.copy()
+    dct["replica"] = replica
+    dct["seed2"] += replica
+    dct["suffix"] = get_suffix(dct)
+
+    REPLICAS_STORE = os.path.join(ROOT, "replicas")
+    TARGET_PATH = os.path.join(ROOT, "runs/L%(L)sb%(beta)s" % dct)
+
+    
+    # write out the par file
+    parfname = "par_%s" % dct["suffix"]
+    parfname = os.path.join(TARGET_PATH, parfname)
+    
+    with open(parfname, "w") as parf:
+        parf.write(par_template % dct)
+
+    # sanity check:
+    # FIXME
+    if dct["stat"] != "0" and float(dct["therm"]) != 0:
+        print("!!! ", parfname, "stat & therm")
+
+    
+    # write out the slurm file
+    slurmfname = "slurm_%s.sbatch" % dct["suffix"]
+    slurmfname = os.path.join(TARGET_PATH, slurmfname)
+    with open(slurmfname, "w") as sf:
+        sf.write(SLURM_TEMPLATE % dct)
+    
+    # chmod u+x for SLURM
+    st = os.stat(slurmfname)
+    os.chmod(slurmfname, st.st_mode | stat.S_IEXEC)
+    
+    # copy the replica over
+    r_path = "disord_L%sr%s.dat" % (dct["L"], replica)
+    r_path = os.path.join(REPLICAS_STORE, r_path)
+    shutil.copy(r_path,
+                os.path.join(TARGET_PATH, "disord_%s.dat" % dct["suffix"]))
+    # FIXME: create a replica if not exists
+
+    return slurmfname
+
+    
 
 
 #########################################

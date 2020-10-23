@@ -3,7 +3,7 @@ import numpy as np
 
 if __name__ == "__main__":
 
-    L = 4
+    L = 6
     seed = 1
 
     for seed in range(1, 11):
