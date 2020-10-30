@@ -6,6 +6,7 @@
 	
 	public :: bSTAT, collate
 	public :: mrg, mrg_save, mrg_conv
+	public :: bool_to_str, bool_to_char
 	
 !*****************************************************************
 	contains
@@ -56,12 +57,14 @@
 !-------------------------------
 !--- Merge blocks & emit av +/- err
 !-------------------------------
-      subroutine mrg(arr,n,Zb)
+      subroutine mrg(arr,n,Zb, OU)
       integer, intent(in)              :: n, Zb
       real*8, dimension(1:n), intent(in) :: arr
+      integer, intent(in) :: OU
 
       real*8  :: av, err, arr1(1:n), zb1
       integer :: i, n1
+
 
 !
 !  2 Sept 2007 :   Calls bSTAT(..) w/ real*8 Zb1
@@ -69,13 +72,13 @@
 
       zb1 = 1.d0*zb;       arr1(1:n) = arr(1:n); n1=n            
 
-      print*,'-----------' !, int(log(1.d0*n)/log(2.d0))+1
+      write(OU, *)'-----------' !, int(log(1.d0*n)/log(2.d0))+1
 
       do;
 
 ! emit
         call bSTAT(arr1,n1,zb1,av,err)
-        print 777, av, err,n1               
+        write(OU, fmt=777) av, err,n1               
  777    format(4x,g12.5,4x,' +/- ',g12.5,8x,I3)
 
 ! enough?
@@ -89,7 +92,7 @@
 
       enddo
 
-      print*,'------------'; print*;
+      WRITE(OU,*) '------------'
 
       end subroutine mrg
 
@@ -207,15 +210,31 @@
 !--------------------------------------
 !--- Utility: convert bool to char for printing
 !--------------------------------------
-    character*1 function bool_to_str(conv)
+    character*1 function bool_to_char(conv)
     implicit none
     logical, intent(in) :: conv
     
     if(conv)then
-        bool_to_str = 'T'
+        bool_to_char = 'T'
     else
-        bool_to_str = 'F'
+        bool_to_char = 'F'
+    endif
+    end function bool_to_char
+
+
+!--------------------------------------
+!--- Utility: convert bool to char for printing
+!--------------------------------------
+    character*8 function bool_to_str(conv)
+    implicit none
+    logical, intent(in) :: conv
+    
+    if(conv)then
+        bool_to_str = '/conv/  '
+    else
+        bool_to_str = '/unconv/'
     endif
     end function bool_to_str
+
 
 	end module bstats

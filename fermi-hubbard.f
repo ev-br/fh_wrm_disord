@@ -43,7 +43,6 @@
 	real*8 :: disorder_amp   ! disorder amplitude
 	real*8, allocatable  :: musite(:)    ! site-dependent chem.potential
 	integer              :: replica_id  ! replica ID (read from the disorder file) 
-	real*8 :: ef, kf     ! Fermi energy & momentum
 
       real*8 :: eta        ! GF- vs Z-sector weight
 
@@ -1426,13 +1425,14 @@
 !--- Print out and check the runtime
 !------------------------------------
 	subroutine prnt
+	implicit none
 	integer :: i,j
 	real*8 :: xxx, yyy, dt 
 
 	real*8 :: PE_av, PE_err, KE_av, KE_err, im_av, im_err
 	real*8 :: dens_av, dens_err
 
-	logical :: lastone
+	logical :: lastone, conv
 
 
 ! 'how much on your watch?'
@@ -1502,24 +1502,21 @@
       
 
 !--- number density ---------------------------------
-	call bSTAT(ndens_stat(1:b_n),b_n, 1.d0*Z_b, dens_av,dens_err)
-
+	call mrg_conv(ndens_stat(1:b_n), b_n, Z_b, dens_av, dens_err, conv)
 	write(1,*)'  '
-      write(1,fmt=702) dens_av, dens_err
- 702  format(8x,'dens =',g12.5,4x,' +/- ',g10.3)
-      
-! Fermi energy & momentum for the non-interacting gas of the same density:
-	kf = (3.d0*pi*pi*dens_av)**(1.d0/3.d0)
-	ef = kf**2 !/2.d0                          ! m=1
-	
-	write(1,fmt=777)ef, kf
- 777  format(8x,'E_F =',g12.5,4x,' k_F = ',g12.5 )
+    write(1, fmt=784) 'dens ', dens_av, dens_err, bool_to_str(conv)
+
+    call mrg(ndens_stat, b_n, Z_b, OU=1)
 
 !--- integrated correlator ---------------------------
-	call bSTAT(im_stat(1:b_n),b_n, 1.d0*Z_b, im_av,im_err)
-	write(1,*)' '
-      write(1,fmt=703) im_av, im_err
- 703  format(8x,'g_im(w=0,k=0) =',g12.5,4x,' +/- ',g12.5)
+	call mrg_conv(im_stat(1:b_n), b_n, Z_b, im_av, im_err, conv)
+	write(1,*)'  '
+	write(1, fmt=784) 'g_im(w=0, k=0)', im_av, im_err, bool_to_str(conv)
+
+    call mrg(im_stat, b_n, Z_b, OU=1)
+
+
+ 784    format(8x, A, ' = ', g12.5,2x, ' +/- ', g12.5,8x, '   ', A)
 
 
 !-----------------------------------------------------
