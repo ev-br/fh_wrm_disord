@@ -10,7 +10,7 @@ import stat
 ROOT = "~/fhdw/"
 
 # @ duneyrr
-ROOT = "~/sweethome/ferm/worm_disord/"
+#ROOT = "~/sweethome/ferm/worm_disord/"
 
 ROOT = os.path.expanduser(ROOT)
 
