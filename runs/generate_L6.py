@@ -8,7 +8,7 @@ base_dct = {"L": 6, "amp": "0.1", "beta": "3.5",   # physical
        }
 
 sbatch_files = []
-for replica in range(1, 4):
+for replica in range(1, 11):
     sf = write_out_one(base_dct, replica)
     sbatch_files.append(sf)
     
