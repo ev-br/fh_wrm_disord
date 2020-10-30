@@ -177,7 +177,7 @@
 !   fixed, once this number is reached, the blocks are collated so that one has twice
 !   as few blocks of twice the size. 
 !
-	integer, parameter :: b_n_max=100   ! max # of blocks
+	integer, parameter :: b_n_max=1000   ! max # of blocks
 	integer  :: Z_b                     ! block size
 
 	integer :: b_n, i_b    ! # of filled blocks  & current nbr. of measurements 
