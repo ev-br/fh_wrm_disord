@@ -291,6 +291,7 @@
 	program MAIN
 	use vrbls; use det_n2
 	use mumbers; use tree
+	use bstats
 	implicit none 
 
 	logical :: acpt                   ! accepted update flag
@@ -1421,47 +1422,6 @@
 
 !================  DONE with measurements; various service functions below 
 
-
-
-!------------------------
-!--- Collate the array
-!------------------------
-      subroutine collate(arr,n)
-      real*8, dimension(*) :: arr
-      integer :: n, Zb        ! array length & # of measurements per array entry
-
-      integer :: i
-
-      do i=1,n/2
-          arr(i)=arr(2*i)+arr(2*i-1)
-      enddo
-
-      end subroutine collate
-
-
-!-------------------------------
-!--- Analyze block statistics: average and dispersion
-!-------------------------------
-	subroutine bSTAT(arr,n,Zb,av,err)
-	real*8, dimension(*) :: arr
-	integer              :: n, Zb
-	real*8               :: av, err
-
-	real*8 :: av2, dif
-
-	av  = sum( arr(1:n) )/Zb/n
-	av2 = sum( arr(1:n)**2 )/Zb/Zb/n
-
-				!av2 = av2 + (arr(j)/Zb)**2
-
-	dif = av2 - av*av; 	if(dif<0.d0)dif=0.d0
-
-	err = sqrt( dif ) / sqrt(1.d0*n)
-
-
-	end subroutine bSTAT
-
-
 !------------------------------------
 !--- Print out and check the runtime
 !------------------------------------
@@ -1526,7 +1486,7 @@
 
 
 !--- pot. energy -----------------------------------
-	call bSTAT(PE_stat(1:b_n),b_n,Z_b,PE_av,PE_err)
+	call bSTAT(PE_stat(1:b_n),b_n, 1.d0*Z_b,PE_av,PE_err)
 
 	write(1,*)'  '
       write(1,fmt=701) PE_av, PE_err
@@ -1534,7 +1494,7 @@
 
       
 !--- kin. energy -----------------------------------
-	call bSTAT(KE_stat(1:b_n),b_n,Z_b,KE_av,KE_err)
+	call bSTAT(KE_stat(1:b_n),b_n, 1.d0*Z_b,KE_av,KE_err)
 
 	write(1,*)'  '
       write(1,fmt=711) KE_av, KE_err
@@ -1542,7 +1502,7 @@
       
 
 !--- number density ---------------------------------
-	call bSTAT(ndens_stat(1:b_n),b_n,Z_b,dens_av,dens_err)
+	call bSTAT(ndens_stat(1:b_n),b_n, 1.d0*Z_b, dens_av,dens_err)
 
 	write(1,*)'  '
       write(1,fmt=702) dens_av, dens_err
@@ -1556,7 +1516,7 @@
  777  format(8x,'E_F =',g12.5,4x,' k_F = ',g12.5 )
 
 !--- integrated correlator ---------------------------
-	call bSTAT(im_stat(1:b_n),b_n,Z_b,im_av,im_err)
+	call bSTAT(im_stat(1:b_n),b_n, 1.d0*Z_b, im_av,im_err)
 	write(1,*)' '
       write(1,fmt=703) im_av, im_err
  703  format(8x,'g_im(w=0,k=0) =',g12.5,4x,' +/- ',g12.5)

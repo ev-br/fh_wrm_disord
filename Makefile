@@ -2,15 +2,15 @@ FF = ifort -xHost -Ofast -free
 OUT = a.out
 
 #MPIFF = mpiifort -xHost -Ofast
-LIBS =  -L${MKLROOT}/lib/intel64 -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -liomp5 -lpthread -lm -ldl
+#LIBS =  -L${MKLROOT}/lib/intel64 -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -liomp5 -lpthread -lm -ldl
 #OUT = a.i.out
 
 # GNU
-#FF = gfortran -O2 -ffree-form
-#LIBS = -lblas -llapack   # on a laptop
-#OUT= a.out
+FF = gfortran -O2 -ffree-form
+LIBS = -lblas -llapack   # on a laptop
+OUT= a.out
 
-SOURCES = det_n2.f event_mod.f rndm_mumbers.f
+SOURCES = det_n2.f event_mod.f rndm_mumbers.f bstats.f
 
 all:
 	$(FF) $(SOURCES) fermi-hubbard.f $(LIBS) -o $(OUT)
