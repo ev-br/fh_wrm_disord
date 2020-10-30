@@ -1,0 +1,31 @@
+__v2__    ! version tag
+3         ! dimension
+%(L)s         ! N(1)
+%(L)s         ! N(2)
+%(L)s         ! N(3)
+%(cnf)s         ! 0 if new configuration, 1 if old one
+%(stat)s         ! 0 if new statistics,    1 if old one
+0         ! 0 if new rndm() seed
+-5.2d0              ! \mu
+%(amp)s       ! disorder amplitude
+7.915d0  0.015d0     ! - U, initial for thermalization
+%(beta)sd0               ! \beta
+0.8d0      ! eta: GF vs Z weight
+500       ! number of \tau points for GF tabulation
+1.d2      ! tolerance level for determinant recalculation
+0  1.0d0  ! x- and \tau- radii for cre/ann
+1  1.4d0  ! x- and \tau- radii for leap_add/drop
+100       ! nt
+%(therm)s         ! number of sweeps for thermalization
+%(step_p)s     ! step for printing
+%(step_w)s     ! step for writing to disk
+1.d0      ! step for measuring
+16.0       ! time limit, hrs
+------
+0.0       ! add/drop
+0.1       ! cre/ann
+0.25      ! leap_add/drop
+0.3     ! hop
+------
+%(seed1)s %(seed2)s
+4836 2738
