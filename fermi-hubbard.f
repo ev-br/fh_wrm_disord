@@ -1432,7 +1432,7 @@
 	real*8 :: PE_av, PE_err, KE_av, KE_err, im_av, im_err
 	real*8 :: dens_av, dens_err
 
-	logical :: lastone, conv
+	logical :: lastone, dens_conv, im_conv
 
 
 ! 'how much on your watch?'
@@ -1502,22 +1502,27 @@
       
 
 !--- number density ---------------------------------
-	call mrg_conv(ndens_stat(1:b_n), b_n, Z_b, dens_av, dens_err, conv)
+	call mrg_conv(ndens_stat(1:b_n), b_n, Z_b, dens_av, dens_err, dens_conv)
 	write(1,*)'  '
-    write(1, fmt=784) 'dens ', dens_av, dens_err, bool_to_str(conv)
+    write(1, fmt=784) 'dens ', dens_av, dens_err, bool_to_str(dens_conv)
 
     call mrg(ndens_stat, b_n, Z_b, OU=1)
 
 !--- integrated correlator ---------------------------
-	call mrg_conv(im_stat(1:b_n), b_n, Z_b, im_av, im_err, conv)
+	call mrg_conv(im_stat(1:b_n), b_n, Z_b, im_av, im_err, im_conv)
 	write(1,*)'  '
-	write(1, fmt=784) 'g_im(w=0, k=0)', im_av, im_err, bool_to_str(conv)
+	write(1, fmt=784) 'g_im(w=0, k=0)', im_av, im_err, bool_to_str(im_conv)
 
     call mrg(im_stat, b_n, Z_b, OU=1)
 
 
  784    format(8x, A, ' = ', g12.5,2x, ' +/- ', g12.5,8x, '   ', A)
 
+
+! write the "results" line
+    open(2, file='res'//trim(fnamesuffix)//'.dat')
+    write(2, *) replica_id, dens_av, dens_err, bool_to_char(dens_conv), im_av, im_err, bool_to_char(im_conv), Z/1d6
+    close(2)
 
 !-----------------------------------------------------
 	write(1,*)
