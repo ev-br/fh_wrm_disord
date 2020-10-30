@@ -1,0 +1,10 @@
+sbatch /home/eburovskiy/fhdw/runs/L6b3.5/slurm_L6b3.5r1a0.1.sbatch
+sbatch /home/eburovskiy/fhdw/runs/L6b3.5/slurm_L6b3.5r2a0.1.sbatch
+sbatch /home/eburovskiy/fhdw/runs/L6b3.5/slurm_L6b3.5r3a0.1.sbatch
+sbatch /home/eburovskiy/fhdw/runs/L6b3.5/slurm_L6b3.5r4a0.1.sbatch
+sbatch /home/eburovskiy/fhdw/runs/L6b3.5/slurm_L6b3.5r5a0.1.sbatch
+sbatch /home/eburovskiy/fhdw/runs/L6b3.5/slurm_L6b3.5r6a0.1.sbatch
+sbatch /home/eburovskiy/fhdw/runs/L6b3.5/slurm_L6b3.5r7a0.1.sbatch
+sbatch /home/eburovskiy/fhdw/runs/L6b3.5/slurm_L6b3.5r8a0.1.sbatch
+sbatch /home/eburovskiy/fhdw/runs/L6b3.5/slurm_L6b3.5r9a0.1.sbatch
+sbatch /home/eburovskiy/fhdw/runs/L6b3.5/slurm_L6b3.5r10a0.1.sbatch
