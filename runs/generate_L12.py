@@ -3,9 +3,9 @@ from generate_runs import write_out_one, read_par_template
 base_dct = {"L": 12, "amp": "0.1", "beta": "4.2",   # physical
             "seed1": 4836, "seed2": 2738,
             "replica" : "1",
-            "cnf": 0, "stat": 0, "therm": "1d2",   # new or restart
+            "cnf": 1, "stat": 0, "therm": "0",   # new or restart
             "step_p": "1d6", "step_w": "1d6",      # printout/checkpoint
-            "time": "16.0",
+            "time": "24.0",
        }
 
 par_template = read_par_template("par_L12.template")
