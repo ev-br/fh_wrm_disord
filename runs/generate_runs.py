@@ -19,6 +19,7 @@ SLURM_TEMPLATE = \
 r"""#!/bin/bash
 #SBATCH --job-name=%(suffix)s
 #SBATCH -n 1
+#SBATCH -t 7-00:00
 
 module load INTEL/parallel_studio_xe_2020_ce
 
