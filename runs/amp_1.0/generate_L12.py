@@ -5,7 +5,7 @@ base_dct = {"L": 12, "amp": "1.0", "beta": "4.0",   # physical
             "replica" : "1",
             "cnf": 1, "stat": 0, "therm": "0d2",   # new or restart
             "step_p": "1d6", "step_w": "1d6",      # printout/checkpoint
-            "time": "72.0",
+            "time": "144.0",
        }
 
 par_template = read_par_template("par_L6.template")
